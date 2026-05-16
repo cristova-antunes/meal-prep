@@ -7,20 +7,12 @@ datasource db {
   provider = "postgresql"
 }
 
-model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  name      String?
-  clerkId   String   @unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
 enum RecipeType {
   MEAT
   FISH
   VEGETARIAN
   DESSERT
+  SNACK
 }
 
 model Recipe {
@@ -33,6 +25,7 @@ model Recipe {
   isCustom     Boolean      @default(false)
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
+  clerkId      String       @unique
 
   recipeIngredients RecipeIngredient[]
 
@@ -44,6 +37,7 @@ model Ingredient {
   name      String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  clerkId   String   @unique
 
   recipes Recipe[]
 
@@ -54,6 +48,7 @@ model RecipeIngredient {
   recipeId     String
   ingredientId String
   quantity     String
+  clerkId      String @unique
 
   recipe     Recipe     @relation(fields: [recipeId], references: [id])
   ingredient Ingredient @relation(fields: [ingredientId], references: [id])
@@ -67,6 +62,7 @@ model DailyMenu {
   recipes   Recipe[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  clerkId   String   @unique
 
   weeklyMenus WeeklyMenu[]
 }
@@ -76,6 +72,7 @@ model WeeklyMenu {
   week      Int
   year      Int
   recipes   DailyMenu[]
+  clerkId   String      @unique
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
 }
