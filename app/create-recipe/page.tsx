@@ -195,7 +195,7 @@ export default async function RecipePage() {
           </div>
           <Link
             href={"/recipes"}
-            className={buttonVariants({ variant: "secondary", size: "sm" })}
+            className={buttonVariants({ variant: "default" })}
           >
             Recipes
           </Link>

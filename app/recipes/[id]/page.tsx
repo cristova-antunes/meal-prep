@@ -2,8 +2,11 @@ import { currentUser } from "@clerk/nextjs/server";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { buttonVariants } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import DeleteRecipeForm from "../DeleteRecipeForm";
 import IngredientsEditor from "../IngredientsEditor";
+import { Badge } from "@/components/ui/badge";
+import { ExternalLink } from "lucide-react";
 
 async function addIngredientToRecipe(formData: FormData) {
   "use server";
@@ -83,14 +86,14 @@ export default async function RecipeDetailPage({
   if (!user) {
     return (
       <div className="min-h-screen p-8">
-        <div className="mx-auto max-w-3xl rounded-3xl border border-border bg-card p-10 text-center shadow-sm">
+        <Card className="mx-auto max-w-3xl p-10 text-center shadow-sm">
           <h1 className="text-2xl font-semibold">
             Sign in to view this recipe
           </h1>
           <p className="mt-4 text-sm text-muted-foreground">
             Your recipes are stored per Clerk user.
           </p>
-        </div>
+        </Card>
       </div>
     );
   }
@@ -105,12 +108,12 @@ export default async function RecipeDetailPage({
   if (!recipe || recipe.clerkId !== user.id) {
     return (
       <main className="mx-auto max-w-4xl px-4 py-8">
-        <div className="rounded-3xl border border-border bg-card p-10 text-center shadow-sm">
+        <Card className="p-10 text-center shadow-sm">
           <h1 className="text-2xl font-semibold">Recipe not found</h1>
           <p className="mt-4 text-sm text-muted-foreground">
             Could not find a recipe with that id.
           </p>
-        </div>
+        </Card>
       </main>
     );
   }
@@ -130,17 +133,16 @@ export default async function RecipeDetailPage({
               {recipe.description}
             </p>
           ) : null}
-          <p className="mt-2 text-sm">Type: {recipe.type}</p>
+          <Badge className="mt-2">{recipe.type}</Badge>
           {recipe.instagramURL ? (
-            <p className="mt-2 text-sm">
-              Instagram:{" "}
-              <Link
-                href={recipe.instagramURL}
-                className={buttonVariants({ variant: "link", size: "sm" })}
-              >
-                {recipe.instagramURL}
-              </Link>
-            </p>
+            <Link
+              href={recipe.instagramURL}
+              target="_blank"
+              className={buttonVariants({ variant: "link", size: "sm" })}
+            >
+              <ExternalLink className="mr-1" />
+              Instagram
+            </Link>
           ) : null}
         </div>
         <div className="flex flex-col gap-2">

@@ -64,13 +64,11 @@ export default function RecipeManager({
         />
       </div>
 
-      <div className="space-y-6">
-        <IngredientsCard
-          ingredients={ingredients}
-          updateIngredientAction={handleUpdateIngredient}
-          deleteIngredientAction={handleDeleteIngredient}
-        />
-      </div>
+      <IngredientsCard
+        ingredients={ingredients}
+        updateIngredientAction={handleUpdateIngredient}
+        deleteIngredientAction={handleDeleteIngredient}
+      />
     </div>
   );
 }

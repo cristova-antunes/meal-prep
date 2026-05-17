@@ -2,6 +2,14 @@ import { currentUser } from "@clerk/nextjs/server";
 import { buttonVariants } from "@/components/ui/button";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 export default async function RecipesPage() {
   const user = await currentUser();
@@ -32,7 +40,7 @@ export default async function RecipesPage() {
         <h1 className="text-3xl font-semibold">My Recipes</h1>
         <Link
           href="/create-recipe"
-          className={buttonVariants({ variant: "secondary", size: "sm" })}
+          className={buttonVariants({ variant: "default" })}
         >
           Create Recipe
         </Link>
@@ -45,22 +53,27 @@ export default async function RecipesPage() {
           </p>
         </div>
       ) : (
-        <ul className="grid grid-cols-1 gap-4">
+        <ul className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
           {recipes.map((r) => (
-            <li
-              key={r.id}
-              className="flex items-center justify-between rounded-md border border-border bg-card p-4"
-            >
-              <div>
-                <div className="text-lg font-medium">{r.title}</div>
-                <div className="text-sm text-muted-foreground">{r.type}</div>
-              </div>
-              <Link
-                href={`/recipes/${r.id}`}
-                className={buttonVariants({ variant: "ghost", size: "sm" })}
-              >
-                View
-              </Link>
+            <li key={r.id}>
+              <Card>
+                <CardHeader>
+                  <CardTitle>{r.title}</CardTitle>
+                  <CardDescription>
+                    <Badge>{r.type}</Badge>
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="text-right">
+                  <Link
+                    href={`/recipes/${r.id}`}
+                    className={buttonVariants({
+                      variant: "secondary",
+                    })}
+                  >
+                    View recipe
+                  </Link>
+                </CardContent>
+              </Card>
             </li>
           ))}
         </ul>
