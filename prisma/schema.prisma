@@ -7,72 +7,66 @@ datasource db {
   provider = "postgresql"
 }
 
-enum RecipeType {
-  MEAT
-  FISH
-  VEGETARIAN
-  DESSERT
-  SNACK
-}
-
 model Recipe {
-  id           String       @id @default(uuid())
-  title        String
-  description  String?
-  type         RecipeType
-  ingredients  Ingredient[]
-  instagramURL String?
-  isCustom     Boolean      @default(false)
-  createdAt    DateTime     @default(now())
-  updatedAt    DateTime     @updatedAt
-  clerkId      String       @unique
-
+  id                String             @id @default(uuid())
+  title             String
+  description       String?
+  type              RecipeType
+  instagramURL      String?
+  isCustom          Boolean            @default(false)
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  clerkId           String
   recipeIngredients RecipeIngredient[]
-
-  dailyMenus DailyMenu[]
+  dailyMenus        DailyMenu[]        @relation("DailyMenuToRecipe")
+  ingredients       Ingredient[]       @relation("IngredientToRecipe")
 }
 
 model Ingredient {
-  id        String   @id @default(uuid())
-  name      String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  clerkId   String   @unique
-
-  recipes Recipe[]
-
+  id                String             @id @default(uuid())
+  name              String
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  clerkId           String
   recipeIngredients RecipeIngredient[]
+  recipes           Recipe[]           @relation("IngredientToRecipe")
 }
 
 model RecipeIngredient {
   recipeId     String
   ingredientId String
   quantity     String
-  clerkId      String @unique
-
-  recipe     Recipe     @relation(fields: [recipeId], references: [id])
-  ingredient Ingredient @relation(fields: [ingredientId], references: [id])
+  clerkId      String
+  ingredient   Ingredient @relation(fields: [ingredientId], references: [id])
+  recipe       Recipe     @relation(fields: [recipeId], references: [id])
 
   @@id([recipeId, ingredientId])
 }
 
 model DailyMenu {
-  id        String   @id @default(uuid())
-  date      DateTime
-  recipes   Recipe[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  clerkId   String   @unique
-
-  weeklyMenus WeeklyMenu[]
+  id          String       @id @default(uuid())
+  date        DateTime
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  clerkId     String
+  recipes     Recipe[]     @relation("DailyMenuToRecipe")
+  weeklyMenus WeeklyMenu[] @relation("DailyMenuToWeeklyMenu")
 }
 
 model WeeklyMenu {
   id        String      @id @default(uuid())
   week      Int
   year      Int
-  recipes   DailyMenu[]
-  clerkId   String      @unique
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
+  clerkId   String
+  recipes   DailyMenu[] @relation("DailyMenuToWeeklyMenu")
+}
+
+enum RecipeType {
+  MEAT
+  FISH
+  VEGETARIAN
+  DESSERT
+  SNACK
 }

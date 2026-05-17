@@ -29,6 +29,9 @@ dependencies:
   next:
     specifier: 16.2.6
     version: 16.2.6(@babel/core@7.29.0)(react-dom@19.2.4)(react@19.2.4)
+  next-themes:
+    specifier: ^0.4.6
+    version: 0.4.6(react-dom@19.2.4)(react@19.2.4)
   pg:
     specifier: ^8.20.0
     version: 8.20.0
@@ -44,6 +47,9 @@ dependencies:
   shadcn:
     specifier: ^4.7.0
     version: 4.7.0(@types/node@20.19.41)(typescript@5.9.3)
+  sonner:
+    specifier: ^2.0.7
+    version: 2.0.7(react-dom@19.2.4)(react@19.2.4)
   tailwind-merge:
     specifier: ^3.6.0
     version: 3.6.0
@@ -5927,6 +5933,16 @@ packages:
     engines: {node: '>= 0.6'}
     dev: false
 
+  /next-themes@0.4.6(react-dom@19.2.4)(react@19.2.4):
+    resolution: {integrity: sha512-pZvgD5L0IEvX5/9GWyHMf3m8BKiVQwsCMHfoFosXtXBMnaS0ZnIJ9ST4b4NqLVKDEm8QBxoNNGNaBv2JNF6XNA==}
+    peerDependencies:
+      react: ^16.8 || ^17 || ^18 || ^19 || ^19.0.0-rc
+      react-dom: ^16.8 || ^17 || ^18 || ^19 || ^19.0.0-rc
+    dependencies:
+      react: 19.2.4
+      react-dom: 19.2.4(react@19.2.4)
+    dev: false
+
   /next@16.2.6(@babel/core@7.29.0)(react-dom@19.2.4)(react@19.2.4):
     resolution: {integrity: sha512-qOVgKJg1+At15NpeUP+eJgCHvTCgXsogweq87Ri/Ix7PkqQHg4sdaXmSFqKlgaIXE4kW0g25LE68W87UANlHtw==}
     engines: {node: '>=20.9.0'}
@@ -7010,6 +7026,16 @@ packages:
 
   /sisteransi@1.0.5:
     resolution: {integrity: sha512-bLGGlR1QxBcynn2d5YmDX4MGjlZvy2MRBDRNHLJ8VI6l6+9FUiyTFNJ0IveOSP0bcXgVDPRcfGqA0pjaqUpfVg==}
+    dev: false
+
+  /sonner@2.0.7(react-dom@19.2.4)(react@19.2.4):
+    resolution: {integrity: sha512-W6ZN4p58k8aDKA4XPcx2hpIQXBRAgyiWVkYhT7CvK6D3iAu7xjvVyhQHg2/iaKJZ1XVJ4r7XuwGL+WGEK37i9w==}
+    peerDependencies:
+      react: ^18.0.0 || ^19.0.0 || ^19.0.0-rc
+      react-dom: ^18.0.0 || ^19.0.0 || ^19.0.0-rc
+    dependencies:
+      react: 19.2.4
+      react-dom: 19.2.4(react@19.2.4)
     dev: false
 
   /source-map-js@1.2.1:
