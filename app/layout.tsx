@@ -42,11 +42,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={cn(
-        "font-sans dark",
-        inter.variable,
-        geistMonoHeading.variable,
-      )}
+      className={cn("font-sans", inter.variable, geistMonoHeading.variable)}
     >
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}

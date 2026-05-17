@@ -2,7 +2,8 @@ import { prisma } from "@/lib/prisma";
 import type { Recipe } from "@/app/generated/prisma/client";
 import { currentUser } from "@clerk/nextjs/server";
 import RecipeManager from "./RecipeManager";
-import { RecipeListItem } from "./types";
+import Link from "next/link";
+import { buttonVariants } from "@/components/ui/button";
 
 async function createIngredient(formData: FormData) {
   "use server";
@@ -96,15 +97,15 @@ async function createRecipe(formData: FormData) {
   const description = formData.get("description")?.toString().trim() || null;
   const instagramUrl = formData.get("instagramUrl")?.toString().trim() || null;
   const type = formData.get("type")?.toString();
-  const ingredientIds = formData
+  const ingredientNames = formData
     .getAll("ingredientIds")
-    .map((id) => id.toString())
+    .map((name) => name.toString())
     .filter(Boolean);
   const quantities = formData
     .getAll("quantities")
     .map((quantity) => quantity.toString());
 
-  if (!title || !type || ingredientIds.length === 0) {
+  if (!title || !type || ingredientNames.length === 0) {
     throw new Error(
       "Recipe title, type, and at least one ingredient are required.",
     );
@@ -120,9 +121,24 @@ async function createRecipe(formData: FormData) {
     },
   });
 
-  const ingredientRows = ingredientIds
-    .map((ingredientId, index) => ({
-      ingredientId,
+  // Look up ingredient IDs by name
+  const ingredients = await prisma.ingredient.findMany({
+    where: {
+      name: {
+        in: ingredientNames,
+      },
+      clerkId: user.id,
+    },
+  });
+
+  const ingredientNameToId: Record<string, string> = {};
+  ingredients.forEach((ing) => {
+    ingredientNameToId[ing.name] = ing.id;
+  });
+
+  const ingredientRows = ingredientNames
+    .map((ingredientName, index) => ({
+      ingredientId: ingredientNameToId[ingredientName],
       quantity: quantities[index]?.trim() || "1",
     }))
     .filter((row) => row.ingredientId);
@@ -137,66 +153,6 @@ async function createRecipe(formData: FormData) {
       })),
     });
   }
-}
-
-async function updateRecipe(formData: FormData) {
-  "use server";
-  const user = await currentUser();
-
-  if (!user) {
-    throw new Error("You must be signed in to update recipes.");
-  }
-
-  const id = formData.get("recipeId")?.toString();
-  const title = formData.get("title")?.toString().trim();
-  const description = formData.get("description")?.toString().trim() || null;
-  const instagramUrl = formData.get("instagramUrl")?.toString().trim() || null;
-  const type = formData.get("type")?.toString();
-
-  if (!id || !title || !type) {
-    throw new Error("Recipe id, title, and type are required.");
-  }
-
-  await prisma.recipe.updateMany({
-    where: {
-      id,
-      clerkId: user.id,
-    },
-    data: {
-      title,
-      description,
-      instagramURL: instagramUrl,
-      type: type as Recipe["type"],
-    },
-  });
-}
-
-async function deleteRecipe(formData: FormData) {
-  "use server";
-  const user = await currentUser();
-
-  if (!user) {
-    throw new Error("You must be signed in to delete recipes.");
-  }
-
-  const id = formData.get("recipeId")?.toString();
-
-  if (!id) {
-    throw new Error("Recipe id is required.");
-  }
-
-  await prisma.recipeIngredient.deleteMany({
-    where: {
-      recipeId: id,
-    },
-  });
-
-  await prisma.recipe.deleteMany({
-    where: {
-      id,
-      clerkId: user.id,
-    },
-  });
 }
 
 export default async function RecipePage() {
@@ -226,46 +182,32 @@ export default async function RecipePage() {
     },
   });
 
-  const recipes = await prisma.recipe.findMany({
-    where: {
-      clerkId: user.id,
-    },
-    include: {
-      recipeIngredients: {
-        include: {
-          ingredient: true,
-        },
-      },
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
-
-  const recipeItems: RecipeListItem[] = recipes.map((recipe) => ({
-    ...recipe,
-    createdAt: recipe.createdAt.toISOString(),
-  }));
-
   return (
     <main className="mx-auto max-w-7xl px-4 py-8">
-      <div className="mb-8 space-y-4">
-        <h1 className="text-3xl font-semibold">Ingredients & Recipes</h1>
-        <p className="max-w-3xl text-sm text-muted-foreground">
-          Create ingredients first, then build recipes by selecting from the
-          ingredients you have created.
-        </p>
+      <div className="mb-8">
+        <div className="flex justify-between gap-6">
+          <div className="space-y-4">
+            <h1 className="text-3xl font-semibold">Ingredients & Recipes</h1>
+            <p className="max-w-3xl text-sm text-muted-foreground">
+              Create ingredients first, then build recipes by selecting from the
+              ingredients you have created.
+            </p>
+          </div>
+          <Link
+            href={"/recipes"}
+            className={buttonVariants({ variant: "secondary", size: "sm" })}
+          >
+            Recipes
+          </Link>
+        </div>
       </div>
 
       <RecipeManager
         ingredients={ingredients}
-        recipes={recipeItems}
         createIngredientAction={createIngredient}
         updateIngredientAction={updateIngredient}
         deleteIngredientAction={deleteIngredient}
         createRecipeAction={createRecipe}
-        updateRecipeAction={updateRecipe}
-        deleteRecipeAction={deleteRecipe}
       />
     </main>
   );

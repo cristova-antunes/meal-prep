@@ -22,7 +22,7 @@ export default function IngredientsCard({
   );
 
   return (
-    <section className="rounded-3xl border border-border bg-card p-6 shadow-sm max-h-[60vh] overflow-y-auto">
+    <section className="rounded-3xl border border-border bg-card p-6 shadow-sm max-h-[80vh] overflow-y-auto">
       <div className="mb-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h2 className="text-xl font-semibold">Ingredients</h2>
