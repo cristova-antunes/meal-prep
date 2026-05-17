@@ -15,14 +15,34 @@ export default function IngredientsCard({
   deleteIngredientAction: (formData: FormData) => Promise<void>;
 }) {
   const [ingredientEditId, setIngredientEditId] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const filteredIngredients = ingredients.filter((ingredient) =>
+    ingredient.name.toLowerCase().includes(searchQuery.toLowerCase()),
+  );
 
   return (
-    <section className="rounded-3xl border border-border bg-card p-6 shadow-sm">
-      <div className="mb-4 flex items-center justify-between gap-4">
-        <h2 className="text-xl font-semibold">Ingredients</h2>
-        <span className="rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
-          {ingredients.length}
-        </span>
+    <section className="rounded-3xl border border-border bg-card p-6 shadow-sm max-h-[60vh] overflow-y-auto">
+      <div className="mb-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h2 className="text-xl font-semibold">Ingredients</h2>
+          <p className="text-sm text-muted-foreground">
+            {ingredients.length} total ingredient
+            {ingredients.length === 1 ? "" : "s"}
+          </p>
+        </div>
+        <div className="flex flex-col gap-2 sm:w-72">
+          <label className="sr-only" htmlFor="ingredient-search">
+            Search ingredients
+          </label>
+          <Input
+            id="ingredient-search"
+            type="search"
+            placeholder="Search ingredients"
+            value={searchQuery}
+            onChange={(event) => setSearchQuery(event.target.value)}
+          />
+        </div>
       </div>
 
       <div className="space-y-3">
@@ -30,8 +50,12 @@ export default function IngredientsCard({
           <p className="text-sm text-muted-foreground">
             No ingredients yet. Add one above.
           </p>
+        ) : filteredIngredients.length === 0 ? (
+          <p className="text-sm text-muted-foreground">
+            No ingredients match your search.
+          </p>
         ) : (
-          ingredients.map((ingredient) => (
+          filteredIngredients.map((ingredient) => (
             <div
               key={ingredient.id}
               className="rounded-3xl border border-border bg-background p-4"

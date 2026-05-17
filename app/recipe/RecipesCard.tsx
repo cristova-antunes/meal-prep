@@ -68,6 +68,17 @@ export default function RecipesCard({
                   </div>
                   <div>
                     <label className="mb-2 block text-sm font-medium text-muted-foreground">
+                      Instagram URL
+                    </label>
+                    <input
+                      name="instagramUrl"
+                      defaultValue={recipe.instagramURL ?? ""}
+                      placeholder="https://www.instagram.com/p/..."
+                      className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-muted-foreground">
                       Type
                     </label>
                     <Select name="type">

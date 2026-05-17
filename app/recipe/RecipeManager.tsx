@@ -38,6 +38,41 @@ export default function RecipeManager({
     });
   }
 
+  async function handleUpdateIngredient(formData: FormData) {
+    await updateIngredientAction(formData);
+    startTransition(() => {
+      router.refresh();
+    });
+  }
+
+  async function handleDeleteIngredient(formData: FormData) {
+    await deleteIngredientAction(formData);
+    startTransition(() => {
+      router.refresh();
+    });
+  }
+
+  async function handleCreateRecipe(formData: FormData) {
+    await createRecipeAction(formData);
+    startTransition(() => {
+      router.refresh();
+    });
+  }
+
+  async function handleUpdateRecipe(formData: FormData) {
+    await updateRecipeAction(formData);
+    startTransition(() => {
+      router.refresh();
+    });
+  }
+
+  async function handleDeleteRecipe(formData: FormData) {
+    await deleteRecipeAction(formData);
+    startTransition(() => {
+      router.refresh();
+    });
+  }
+
   return (
     <div className="grid gap-6 xl:grid-cols-[1.2fr_1fr]">
       <div className="space-y-6">
@@ -47,20 +82,20 @@ export default function RecipeManager({
         />
         <CreateRecipeCard
           ingredients={ingredients}
-          createRecipeAction={createRecipeAction}
+          createRecipeAction={handleCreateRecipe}
         />
       </div>
 
       <div className="space-y-6">
         <IngredientsCard
           ingredients={ingredients}
-          updateIngredientAction={updateIngredientAction}
-          deleteIngredientAction={deleteIngredientAction}
+          updateIngredientAction={handleUpdateIngredient}
+          deleteIngredientAction={handleDeleteIngredient}
         />
         <RecipesCard
           recipes={recipes}
-          updateRecipeAction={updateRecipeAction}
-          deleteRecipeAction={deleteRecipeAction}
+          updateRecipeAction={handleUpdateRecipe}
+          deleteRecipeAction={handleDeleteRecipe}
         />
       </div>
     </div>

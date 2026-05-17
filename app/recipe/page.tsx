@@ -94,6 +94,7 @@ async function createRecipe(formData: FormData) {
 
   const title = formData.get("title")?.toString().trim();
   const description = formData.get("description")?.toString().trim() || null;
+  const instagramUrl = formData.get("instagramUrl")?.toString().trim() || null;
   const type = formData.get("type")?.toString();
   const ingredientIds = formData
     .getAll("ingredientIds")
@@ -113,6 +114,7 @@ async function createRecipe(formData: FormData) {
     data: {
       title,
       description,
+      instagramURL: instagramUrl,
       type: type as Recipe["type"],
       clerkId: user.id,
     },
@@ -148,6 +150,7 @@ async function updateRecipe(formData: FormData) {
   const id = formData.get("recipeId")?.toString();
   const title = formData.get("title")?.toString().trim();
   const description = formData.get("description")?.toString().trim() || null;
+  const instagramUrl = formData.get("instagramUrl")?.toString().trim() || null;
   const type = formData.get("type")?.toString();
 
   if (!id || !title || !type) {
@@ -162,6 +165,7 @@ async function updateRecipe(formData: FormData) {
     data: {
       title,
       description,
+      instagramURL: instagramUrl,
       type: type as Recipe["type"],
     },
   });

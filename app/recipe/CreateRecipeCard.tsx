@@ -10,6 +10,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Combobox,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxInput,
+  ComboboxItem,
+  ComboboxList,
+} from "@/components/ui/combobox";
 import { Ingredient } from "../generated/prisma/client";
 import { recipeTypes } from "./types";
 
@@ -36,6 +44,7 @@ export default function CreateRecipeCard({
           <Input
             id="recipe-title"
             name="title"
+            required
             placeholder="e.g. Spaghetti Bolognese"
           />
         </div>
@@ -54,6 +63,19 @@ export default function CreateRecipeCard({
             placeholder="Add a short recipe description"
           />
         </div>
+        <div>
+          <label
+            className="mb-2 block text-sm font-medium text-muted-foreground"
+            htmlFor="recipe-instagram-url"
+          >
+            Instagram URL
+          </label>
+          <Input
+            id="recipe-instagram-url"
+            name="instagramUrl"
+            placeholder="e.g. https://www.instagram.com/p/..."
+          />
+        </div>
         <div className="grid gap-4 md:grid-cols-2">
           <div>
             <label
@@ -62,7 +84,7 @@ export default function CreateRecipeCard({
             >
               Recipe type
             </label>
-            <Select name="type">
+            <Select name="type" required>
               <SelectTrigger id="recipe-type">
                 <SelectValue placeholder="Pick a recipe type" />
               </SelectTrigger>
@@ -102,24 +124,23 @@ export default function CreateRecipeCard({
                   <label className="mb-2 block text-sm font-medium text-muted-foreground">
                     Ingredient
                   </label>
-                  <Select name="ingredientIds">
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select ingredient" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {ingredients.length === 0 ? (
-                        <SelectItem value="empty" disabled>
-                          No ingredients yet
-                        </SelectItem>
-                      ) : (
-                        ingredients.map((ingredient) => (
-                          <SelectItem key={ingredient.id} value={ingredient.id}>
-                            {ingredient.name}
-                          </SelectItem>
-                        ))
-                      )}
-                    </SelectContent>
-                  </Select>
+
+                  <Combobox
+                    items={ingredients.map((ingredient) => ingredient.name)}
+                    name="ingredientIds"
+                  >
+                    <ComboboxInput placeholder="Select an ingredient" />
+                    <ComboboxContent>
+                      <ComboboxEmpty>No ingredients yet</ComboboxEmpty>
+                      <ComboboxList>
+                        {(item) => (
+                          <ComboboxItem key={item} value={item}>
+                            {item}
+                          </ComboboxItem>
+                        )}
+                      </ComboboxList>
+                    </ComboboxContent>
+                  </Combobox>
                 </div>
                 <div>
                   <label

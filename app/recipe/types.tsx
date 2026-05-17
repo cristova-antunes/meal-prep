@@ -4,6 +4,7 @@ export type RecipeListItem = {
   id: string;
   title: string;
   description: string | null;
+  instagramURL?: string | null;
   type: string;
   createdAt: string;
   recipeIngredients: Array<{ ingredient: Ingredient; quantity: string }>;
