@@ -16,7 +16,7 @@ const geistMonoHeading = Geist_Mono({
   variable: "--font-heading",
 });
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
+const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -42,7 +42,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={cn("font-sans", inter.variable, geistMonoHeading.variable)}
+      className={cn("font-sans", geist.variable, geistMonoHeading.variable)}
     >
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
