@@ -134,21 +134,21 @@ export default async function RecipeDetailPage({
             </p>
           ) : null}
 
-          <div className="mt-2">
+          <div className="mt-2 flex gap-2 items-center">
             <RecipeTypeBadge type={recipe.type} />
+            {recipe.instagramURL ? (
+              <Link
+                href={recipe.instagramURL}
+                target="_blank"
+                className={buttonVariants({ variant: "link", size: "sm" })}
+              >
+                <ExternalLink className="mr-1" />
+                Instagram
+              </Link>
+            ) : null}
           </div>
-          {recipe.instagramURL ? (
-            <Link
-              href={recipe.instagramURL}
-              target="_blank"
-              className={buttonVariants({ variant: "link", size: "sm" })}
-            >
-              <ExternalLink className="mr-1" />
-              Instagram
-            </Link>
-          ) : null}
         </div>
-        <div className="flex flex-col gap-2">
+        <div className="flex gap-2">
           <Link
             href="/recipes"
             className={buttonVariants({ variant: "secondary", size: "sm" })}
