@@ -17,7 +17,7 @@ export default async function RecipesPage() {
   if (!user) {
     return (
       <div className="min-h-screen p-8">
-        <div className="mx-auto max-w-3xl rounded-3xl border border-border bg-card p-10 text-center shadow-sm">
+        <div className="mx-auto container rounded-3xl border border-border bg-card p-10 text-center shadow-sm">
           <h1 className="text-2xl font-semibold">
             Sign in to view your recipes
           </h1>
@@ -35,7 +35,7 @@ export default async function RecipesPage() {
   });
 
   return (
-    <main className="mx-auto max-w-7xl px-4 py-8">
+    <main className="mx-auto container px-4 py-8">
       <div className="mb-8 space-y-4 flex items-center justify-between">
         <h1 className="text-3xl font-semibold">My Recipes</h1>
         <Link

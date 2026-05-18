@@ -86,7 +86,7 @@ export default async function RecipeDetailPage({
   if (!user) {
     return (
       <div className="min-h-screen p-8">
-        <Card className="mx-auto max-w-3xl p-10 text-center shadow-sm">
+        <Card className="mx-auto container p-10 text-center shadow-sm">
           <h1 className="text-2xl font-semibold">
             Sign in to view this recipe
           </h1>

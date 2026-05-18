@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   Accordion,
   AccordionContent,
@@ -16,8 +17,10 @@ import {
 } from "@/components/ui/select";
 
 import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { RecipeType } from "../generated/prisma/enums";
 import RecipeTypeBadge from "@/components/feature/RecipeTypeBadge";
+import { saveWeeklyMealPrep, resetWeeklyMealPrep } from "./actions";
 
 export type RecipeItem = {
   id: string;
@@ -31,6 +34,7 @@ export type PrepSlot = {
   dinnerLabel: string;
   lunchLabel: string;
   recipeId: string | null;
+  date: Date;
 };
 
 type MealPrepPlannerProps = {
@@ -38,6 +42,7 @@ type MealPrepPlannerProps = {
   recipes: RecipeItem[];
   weekStartLabel: string;
   weekEndLabel: string;
+  weeklyMenuId: string;
 };
 
 function buildIngredientGroups(recipes: RecipeItem[]) {
@@ -101,10 +106,15 @@ export default function MealPrepPlanner({
   recipes,
   weekStartLabel,
   weekEndLabel,
+  weeklyMenuId,
 }: MealPrepPlannerProps) {
   const [assignments, setAssignments] = useState<Record<string, string>>(() =>
     Object.fromEntries(slots.map((slot) => [slot.id, slot.recipeId ?? ""])),
   );
+  const [isSaving, setIsSaving] = useState(false);
+  const [isResetting, setIsResetting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
 
   const filledCount = Object.values(assignments).filter(Boolean).length;
 
@@ -113,6 +123,48 @@ export default function MealPrepPlanner({
       ...current,
       [slotId]: recipeId,
     }));
+    setError(null);
+    setSuccess(null);
+  }
+
+  const router = useRouter();
+
+  async function handleSave() {
+    setIsSaving(true);
+    setError(null);
+    setSuccess(null);
+    try {
+      const slotDates = Object.fromEntries(
+        slots.map((slot) => [slot.id, slot.date]),
+      );
+      await saveWeeklyMealPrep(weeklyMenuId, assignments, slotDates);
+      router.push("/meal-prep");
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Failed to save meal prep plan",
+      );
+    } finally {
+      setIsSaving(false);
+    }
+  }
+
+  async function handleReset() {
+    if (!confirm("Are you sure you want to reset all your meal assignments?")) {
+      return;
+    }
+    setIsResetting(true);
+    setError(null);
+    setSuccess(null);
+    try {
+      await resetWeeklyMealPrep(weeklyMenuId);
+      setAssignments(Object.fromEntries(slots.map((slot) => [slot.id, ""])));
+      setSuccess("Meal prep plan reset successfully!");
+      setTimeout(() => setSuccess(null), 3000);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to reset plan");
+    } finally {
+      setIsResetting(false);
+    }
   }
 
   const selectedRecipeIds = new Set(
@@ -122,11 +174,13 @@ export default function MealPrepPlanner({
   const ingredientSourceRecipes =
     selectedRecipeIds.size > 0
       ? recipes.filter((recipe) => selectedRecipeIds.has(recipe.id))
-      : recipes;
+      : [];
 
   const ingredientGroups = buildIngredientGroups(ingredientSourceRecipes);
   const ingredientSourceLabel =
-    selectedRecipeIds.size > 0 ? "Selected recipes" : "All available recipes";
+    selectedRecipeIds.size > 0
+      ? "Selected recipes"
+      : "Choose a recipe to build your shopping list";
 
   return (
     <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_24rem]">
@@ -144,6 +198,18 @@ export default function MealPrepPlanner({
             </p>
           </div>
         </div>
+
+        {error && (
+          <div className="rounded-lg border border-destructive bg-destructive/10 p-4 text-sm text-destructive">
+            {error}
+          </div>
+        )}
+
+        {success && (
+          <div className="rounded-lg border border-green-600 bg-green-50 p-4 text-sm text-green-700">
+            {success}
+          </div>
+        )}
 
         <div className="grid gap-4">
           {slots.map((slot, index) => (
@@ -194,9 +260,28 @@ export default function MealPrepPlanner({
             </Card>
           ))}
         </div>
+
+        <div className="flex gap-3 p-2 pb-4 sticky bottom-0 bg-background">
+          <Button
+            onClick={handleSave}
+            disabled={isSaving || filledCount === 0}
+            size="lg"
+            className="flex-1"
+          >
+            {isSaving ? "Saving..." : "Save Meal Prep Week"}
+          </Button>
+          <Button
+            onClick={handleReset}
+            disabled={isResetting || filledCount === 0}
+            variant="outline"
+            size="lg"
+          >
+            {isResetting ? "Resetting..." : "Reset"}
+          </Button>
+        </div>
       </section>
       <aside className="space-y-4">
-        <Card>
+        <Card className="sticky top-4">
           <CardContent>
             <p className="text-sm text-muted-foreground">
               {ingredientSourceLabel}

@@ -57,6 +57,7 @@ model WeeklyMenu {
   id        String      @id @default(uuid())
   week      Int
   year      Int
+  label     String // e.g. "Week of Jan 1 to Jan 7"
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
   clerkId   String
