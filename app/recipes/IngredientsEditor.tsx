@@ -12,7 +12,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { recipeIngredient } from "./types";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -21,6 +20,7 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
+import { recipeIngredient } from "@/types/types";
 
 function IngredientSelect({
   allIngredients,

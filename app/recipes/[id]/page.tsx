@@ -5,8 +5,8 @@ import { buttonVariants } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import DeleteRecipeForm from "../DeleteRecipeForm";
 import IngredientsEditor from "../IngredientsEditor";
-import { Badge } from "@/components/ui/badge";
 import { ExternalLink } from "lucide-react";
+import RecipeTypeBadge from "@/components/feature/RecipeTypeBadge";
 
 async function addIngredientToRecipe(formData: FormData) {
   "use server";
@@ -133,7 +133,10 @@ export default async function RecipeDetailPage({
               {recipe.description}
             </p>
           ) : null}
-          <Badge className="mt-2">{recipe.type}</Badge>
+
+          <div className="mt-2">
+            <RecipeTypeBadge type={recipe.type} />
+          </div>
           {recipe.instagramURL ? (
             <Link
               href={recipe.instagramURL}

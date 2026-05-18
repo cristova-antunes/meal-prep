@@ -19,8 +19,8 @@ import {
   ComboboxList,
 } from "@/components/ui/combobox";
 import { Ingredient } from "../generated/prisma/client";
-import { recipeTypes } from "./types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { recipeTypes } from "@/types/types";
 
 export default function CreateRecipeCard({
   ingredients,

@@ -16,11 +16,13 @@ import {
 } from "@/components/ui/select";
 
 import { Card, CardContent } from "@/components/ui/card";
+import { RecipeType } from "../generated/prisma/enums";
+import RecipeTypeBadge from "@/components/feature/RecipeTypeBadge";
 
 export type RecipeItem = {
   id: string;
   title: string;
-  type: string;
+  type: RecipeType;
   ingredients: { id: string; name: string }[];
 };
 
@@ -86,7 +88,7 @@ function RecipeSelect({
         <SelectItem value="empty">Choose recipe...</SelectItem>
         {recipes.map((recipe) => (
           <SelectItem key={recipe.id} value={recipe.id}>
-            {recipe.title} — {recipe.type}
+            {recipe.title} <RecipeTypeBadge type={recipe.type} />
           </SelectItem>
         ))}
       </SelectContent>

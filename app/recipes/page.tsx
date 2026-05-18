@@ -9,7 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import RecipeTypeBadge from "@/components/feature/RecipeTypeBadge";
 
 export default async function RecipesPage() {
   const user = await currentUser();
@@ -60,7 +60,7 @@ export default async function RecipesPage() {
                 <CardHeader>
                   <CardTitle>{r.title}</CardTitle>
                   <CardDescription>
-                    <Badge>{r.type}</Badge>
+                    <RecipeTypeBadge type={r.type} />
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="text-right">
