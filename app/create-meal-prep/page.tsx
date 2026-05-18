@@ -114,16 +114,17 @@ function buildCandidateWeeks(
 }
 
 type CreateMealPrepPageProps = {
-  searchParams?: {
+  searchParams: Promise<{
     weekId?: string;
     week?: string;
     year?: string;
-  };
+  }>;
 };
 
 export default async function MealPrepPage({
   searchParams,
 }: CreateMealPrepPageProps) {
+  const resolvedSearchParams = await searchParams;
   const user = await currentUser();
 
   if (!user) {
@@ -178,9 +179,9 @@ export default async function MealPrepPage({
 
   const candidates = buildCandidateWeeks(sunday, weeklyMenus, 6);
 
-  const selectedWeekId = searchParams?.weekId;
-  const selectedWeekParam = searchParams?.week;
-  const selectedYearParam = searchParams?.year;
+  const selectedWeekId = resolvedSearchParams?.weekId;
+  const selectedWeekParam = resolvedSearchParams?.week;
+  const selectedYearParam = resolvedSearchParams?.year;
 
   const selectedMenuById = selectedWeekId
     ? candidates.find((candidate) => candidate.existing?.id === selectedWeekId)
