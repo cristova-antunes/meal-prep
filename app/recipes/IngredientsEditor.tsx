@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { FormEvent, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Ingredient } from "../generated/prisma/client";
 import {
@@ -64,7 +65,36 @@ export default function IngredientsEditor({
   removeAction: (formData: FormData) => Promise<void>;
   updateAction: (formData: FormData) => Promise<void>;
 }) {
+  const router = useRouter();
   const [isEditing, setIsEditing] = useState<boolean>(false);
+  const [isPending, startTransition] = useTransition();
+
+  async function handleAddIngredient(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+    await addAction(formData);
+    startTransition(() => {
+      router.refresh();
+    });
+  }
+
+  async function handleUpdateIngredient(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+    await updateAction(formData);
+    startTransition(() => {
+      router.refresh();
+    });
+  }
+
+  async function handleRemoveIngredient(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+    await removeAction(formData);
+    startTransition(() => {
+      router.refresh();
+    });
+  }
 
   return (
     <section>
@@ -122,7 +152,7 @@ export default function IngredientsEditor({
                       <div className="text-sm text-muted-foreground">
                         {isEditing ? (
                           <form
-                            action={updateAction}
+                            onSubmit={handleUpdateIngredient}
                             className="flex items-center gap-2"
                           >
                             <Input
@@ -140,7 +170,11 @@ export default function IngredientsEditor({
                               defaultValue={ri.quantity}
                               className="rounded-md border px-2 py-1 w-20"
                             />
-                            <Button type="submit" size="sm">
+                            <Button
+                              type="submit"
+                              size="sm"
+                              disabled={isPending}
+                            >
                               Update
                             </Button>
                           </form>
@@ -148,14 +182,22 @@ export default function IngredientsEditor({
                       </div>
                     </div>
                     {isEditing ? (
-                      <form action={removeAction} className="inline">
+                      <form
+                        onSubmit={handleRemoveIngredient}
+                        className="inline"
+                      >
                         <Input type="hidden" name="recipeId" value={recipeId} />
                         <Input
                           type="hidden"
                           name="ingredientId"
                           value={ri.ingredientId}
                         />
-                        <Button type="submit" variant="destructive" size="sm">
+                        <Button
+                          type="submit"
+                          variant="destructive"
+                          size="sm"
+                          disabled={isPending}
+                        >
                           Remove
                         </Button>
                       </form>
@@ -167,7 +209,10 @@ export default function IngredientsEditor({
           </div>
         </CardContent>
         <CardFooter>
-          <form action={addAction} className="flex items-center gap-2 w-full">
+          <form
+            onSubmit={handleAddIngredient}
+            className="flex items-center gap-2 w-full"
+          >
             <input type="hidden" name="recipeId" value={recipeId} />
             {/* Ingredient Select (shadcn) with hidden input for form submission */}
             <IngredientSelect allIngredients={allIngredients} />
@@ -176,7 +221,9 @@ export default function IngredientsEditor({
               defaultValue="1"
               className="rounded-md border px-2 py-1 w-20"
             />
-            <Button type="submit">Add</Button>
+            <Button type="submit" disabled={isPending}>
+              Add
+            </Button>
           </form>
         </CardFooter>
       </Card>

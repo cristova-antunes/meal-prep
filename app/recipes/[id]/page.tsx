@@ -5,8 +5,9 @@ import { buttonVariants } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import DeleteRecipeForm from "../DeleteRecipeForm";
 import IngredientsEditor from "../IngredientsEditor";
-import { ExternalLink } from "lucide-react";
+import { ArrowLeft, ExternalLink } from "lucide-react";
 import RecipeTypeBadge from "@/components/feature/RecipeTypeBadge";
+import { Badge } from "@/components/ui/badge";
 
 async function addIngredientToRecipe(formData: FormData) {
   "use server";
@@ -136,6 +137,11 @@ export default async function RecipeDetailPage({
 
           <div className="mt-2 flex gap-2 items-center">
             <RecipeTypeBadge type={recipe.type} />
+            {recipe.isCustom && (
+              <Badge variant="outline" className="ml-2">
+                Custom
+              </Badge>
+            )}
             {recipe.instagramURL ? (
               <Link
                 href={recipe.instagramURL}
@@ -151,8 +157,9 @@ export default async function RecipeDetailPage({
         <div className="flex gap-2">
           <Link
             href="/recipes"
-            className={buttonVariants({ variant: "secondary", size: "sm" })}
+            className={buttonVariants({ variant: "outline", size: "sm" })}
           >
+            <ArrowLeft className="mr-1" />
             Back
           </Link>
           <DeleteRecipeForm recipeId={id} deleteAction={deleteRecipe} />

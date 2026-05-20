@@ -10,6 +10,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { ArrowLeft } from "lucide-react";
 
 export default async function MealPrepDetailPage({
   params,
@@ -79,6 +80,7 @@ export default async function MealPrepDetailPage({
             href="/meal-prep"
             className={buttonVariants({ variant: "outline" })}
           >
+            <ArrowLeft className="mr-1" />
             Back
           </Link>
           <Link

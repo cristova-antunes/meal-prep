@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -101,6 +102,16 @@ export default function CreateRecipeCard({
                     ))}
                   </SelectContent>
                 </Select>
+              </div>
+
+              <div className="flex items-center gap-2 ">
+                <Checkbox id="recipe-is-custom" name="isCustom" value="true" />
+                <label
+                  className="text-sm font-medium text-muted-foreground"
+                  htmlFor="recipe-is-custom"
+                >
+                  Custom recipe
+                </label>
               </div>
             </div>
 

@@ -97,6 +97,7 @@ async function createRecipe(formData: FormData) {
   const description = formData.get("description")?.toString().trim() || null;
   const instagramUrl = formData.get("instagramUrl")?.toString().trim() || null;
   const type = formData.get("type")?.toString();
+  const isCustom = formData.get("isCustom") === "true";
   const ingredientNames = formData
     .getAll("ingredientIds")
     .map((name) => name.toString())
@@ -117,6 +118,7 @@ async function createRecipe(formData: FormData) {
       description,
       instagramURL: instagramUrl,
       type: type as Recipe["type"],
+      isCustom,
       clerkId: user.id,
     },
   });

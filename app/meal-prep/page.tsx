@@ -1,14 +1,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
-import { Button, buttonVariants } from "@/components/ui/button";
-import {
-  Card,
-  CardAction,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { buttonVariants } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default async function Page() {
   const weeks = await prisma.weeklyMenu.findMany({
@@ -38,47 +31,88 @@ export default async function Page() {
       {weeks.length === 0 ? (
         <p>No meal prep weeks yet. Create your first one.</p>
       ) : (
-        <ul className="space-y-3">
+        <ul className="space-y-3 grid sm:grid-cols-2 md:grid-cols-3 gap-4 ">
           {weeks.map((w) => (
             <li key={w.id}>
               <Card>
                 <CardHeader>
                   <CardTitle>
-                    Week {w.week} — {w.year}
-                  </CardTitle>
-                  <CardDescription>
-                    Created {new Date(w.createdAt).toLocaleDateString()}
-                  </CardDescription>
-                  <CardAction>
                     <Link href={`/meal-prep/${w.id}`}>
-                      <Button variant="secondary">Open</Button>
+                      {w.label || ""} {w.year}
                     </Link>
-                  </CardAction>
+                  </CardTitle>
                 </CardHeader>
 
                 <CardContent>
                   <div className="space-y-3">
-                    <div className="text-sm text-muted-foreground">
-                      Recipes made:
-                    </div>
                     {w.recipes.length === 0 ? (
                       <p className="text-sm text-muted-foreground">
                         No recipes logged yet.
                       </p>
                     ) : (
-                      <ul className="space-y-1 text-sm">
-                        {Array.from(
-                          new Set(
-                            w.recipes.flatMap((daily) =>
-                              daily.recipes.map((recipe) => recipe.title),
+                      <>
+                        <div className="grid grid-cols-3 gap-2 mb-4">
+                          {(() => {
+                            const allRecipes = w.recipes.flatMap(
+                              (daily) => daily.recipes,
+                            );
+                            const meatCount = allRecipes.filter(
+                              (r) => r.type === "MEAT",
+                            ).length;
+                            const fishCount = allRecipes.filter(
+                              (r) => r.type === "FISH",
+                            ).length;
+                            const vegetarianCount = allRecipes.filter(
+                              (r) => r.type === "VEGETARIAN",
+                            ).length;
+
+                            return (
+                              <>
+                                <div className="bg-yellow-50 rounded-lg p-2 text-center">
+                                  <div className="text-lg font-semibold text-yellow-900">
+                                    {meatCount}
+                                  </div>
+                                  <div className="text-xs text-yellow-700">
+                                    Meat
+                                  </div>
+                                </div>
+                                <div className="bg-blue-50 rounded-lg p-2 text-center">
+                                  <div className="text-lg font-semibold text-blue-900">
+                                    {fishCount}
+                                  </div>
+                                  <div className="text-xs text-blue-700">
+                                    Fish
+                                  </div>
+                                </div>
+                                <div className="bg-green-50 rounded-lg p-2 text-center">
+                                  <div className="text-lg font-semibold text-green-900">
+                                    {vegetarianCount}
+                                  </div>
+                                  <div className="text-xs text-green-700">
+                                    Vegetarian
+                                  </div>
+                                </div>
+                              </>
+                            );
+                          })()}
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          Recipes made:
+                        </div>
+                        <ul className="space-y-1 text-sm">
+                          {Array.from(
+                            new Set(
+                              w.recipes.flatMap((daily) =>
+                                daily.recipes.map((recipe) => recipe.title),
+                              ),
                             ),
-                          ),
-                        ).map((title) => (
-                          <li key={title} className="list-disc pl-5">
-                            {title}
-                          </li>
-                        ))}
-                      </ul>
+                          ).map((title) => (
+                            <li key={title} className="list-disc pl-5">
+                              {title}
+                            </li>
+                          ))}
+                        </ul>
+                      </>
                     )}
                   </div>
                 </CardContent>

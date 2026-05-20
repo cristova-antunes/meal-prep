@@ -4,12 +4,12 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import {
   Card,
-  CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
 import RecipeTypeBadge from "@/components/feature/RecipeTypeBadge";
+import { Badge } from "@/components/ui/badge";
 
 export default async function RecipesPage() {
   const user = await currentUser();
@@ -31,7 +31,7 @@ export default async function RecipesPage() {
   const recipes = await prisma.recipe.findMany({
     where: { clerkId: user.id },
     orderBy: { createdAt: "desc" },
-    select: { id: true, title: true, type: true },
+    select: { id: true, title: true, type: true, isCustom: true },
   });
 
   return (
@@ -58,21 +58,18 @@ export default async function RecipesPage() {
             <li key={r.id}>
               <Card>
                 <CardHeader>
-                  <CardTitle>{r.title}</CardTitle>
+                  <CardTitle>
+                    <Link href={`/recipes/${r.id}`}>{r.title}</Link>
+                  </CardTitle>
                   <CardDescription>
                     <RecipeTypeBadge type={r.type} />
+                    {r.isCustom && (
+                      <Badge variant="outline" className="ml-2">
+                        Custom
+                      </Badge>
+                    )}
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="text-right">
-                  <Link
-                    href={`/recipes/${r.id}`}
-                    className={buttonVariants({
-                      variant: "secondary",
-                    })}
-                  >
-                    View recipe
-                  </Link>
-                </CardContent>
               </Card>
             </li>
           ))}
