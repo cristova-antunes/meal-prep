@@ -286,7 +286,7 @@ export default function MealPrepPlanner({
             <p className="text-sm text-muted-foreground">
               {ingredientSourceLabel}
             </p>
-            <h2 className="mt-3 text-2xl font-semibold">
+            <h2 className="mt-3 text-xl font-semibold">
               Ingredient shopping list
             </h2>
             <p className="mt-2 mb-4 text-sm text-muted-foreground">

@@ -63,7 +63,7 @@ export default async function MealPrepDetailPage({
   });
 
   return (
-    <div className="space-y-6 container mx-auto py-8">
+    <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -172,14 +172,14 @@ export default async function MealPrepDetailPage({
               <p className="text-sm text-muted-foreground">
                 Total Days Planned
               </p>
-              <p className="text-2xl font-bold">
+              <p className="text-3xl font-bold">
                 {weeklyMenu.recipes.filter((d) => d.recipes.length > 0).length}
                 /7
               </p>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Total Recipes</p>
-              <p className="text-2xl font-bold">
+              <p className="text-3xl font-bold">
                 {weeklyMenu.recipes.reduce(
                   (sum, d) => sum + d.recipes.length,
                   0,

@@ -40,11 +40,14 @@ export default function RootLayout({
       className={cn("font-sans", geist.variable, geistMonoHeading.variable)}
     >
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen`}
         suppressHydrationWarning
       >
         <ClerkProvider>
-          <header className="p-4 h-16" suppressHydrationWarning>
+          <header
+            className="py-4 h-16 container mx-auto"
+            suppressHydrationWarning
+          >
             <Show when="signed-out">
               <div className="flex justify-end items-center gap-4">
                 <SignInButton />
@@ -59,7 +62,7 @@ export default function RootLayout({
               <MenuNavigation />
             </Show>
           </header>
-          {children}
+          <div className="container my-12 mx-auto">{children}</div>
           <Toaster />
         </ClerkProvider>
       </body>

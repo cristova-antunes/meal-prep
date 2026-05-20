@@ -129,9 +129,9 @@ export default async function MealPrepPage({
 
   if (!user) {
     return (
-      <main className="min-h-screen p-8">
-        <div className="mx-auto container rounded-3xl border border-border bg-card p-10 text-center shadow-sm">
-          <h1 className="text-2xl font-semibold">Sign in to plan your meals</h1>
+      <main>
+        <div className="rounded-3xl border border-border bg-card p-10 text-center shadow-sm">
+          <h1 className="text-3xl font-semibold">Sign in to plan your meals</h1>
           <p className="mt-4 text-sm text-muted-foreground">
             Your recipes are stored per Clerk user, and your upcoming week will
             be prepared from them.
@@ -241,9 +241,9 @@ export default async function MealPrepPage({
 
   if (recipeItems.length === 0) {
     return (
-      <main className="min-h-screen p-8">
-        <div className="mx-auto container rounded-3xl border border-border bg-card p-10 text-center shadow-sm">
-          <h1 className="text-2xl font-semibold">No recipes yet</h1>
+      <main>
+        <div className="rounded-3xl border border-border bg-card p-10 text-center shadow-sm">
+          <h1 className="text-3xl font-semibold">No recipes yet</h1>
           <p className="mt-4 text-sm text-muted-foreground">
             Create recipes first, then return to populate your week of dinner +
             lunch slots.
@@ -267,7 +267,7 @@ export default async function MealPrepPage({
   const [weekStartLabel, weekEndLabel] = selectedCandidate.label.split(" to ");
 
   return (
-    <main className="mx-auto container px-4 py-8">
+    <main>
       <div className="space-y-6">
         <WeekPicker options={weekOptions} selectedValue={selectedValue} />
         <MealPrepPlanner

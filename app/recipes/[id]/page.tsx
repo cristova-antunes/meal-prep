@@ -86,9 +86,9 @@ export default async function RecipeDetailPage({
   const user = await currentUser();
   if (!user) {
     return (
-      <div className="min-h-screen p-8">
-        <Card className="mx-auto container p-10 text-center shadow-sm">
-          <h1 className="text-2xl font-semibold">
+      <div>
+        <Card className="p-10 text-center shadow-sm">
+          <h1 className="text-3xl font-semibold">
             Sign in to view this recipe
           </h1>
           <p className="mt-4 text-sm text-muted-foreground">
@@ -108,9 +108,9 @@ export default async function RecipeDetailPage({
 
   if (!recipe || recipe.clerkId !== user.id) {
     return (
-      <main className="mx-auto max-w-4xl px-4 py-8">
+      <main className="">
         <Card className="p-10 text-center shadow-sm">
-          <h1 className="text-2xl font-semibold">Recipe not found</h1>
+          <h1 className="text-3xl font-semibold">Recipe not found</h1>
           <p className="mt-4 text-sm text-muted-foreground">
             Could not find a recipe with that id.
           </p>
@@ -125,7 +125,7 @@ export default async function RecipeDetailPage({
   });
 
   return (
-    <main className="mx-auto max-w-4xl px-4 py-8">
+    <main className="">
       <div className="mb-6 flex items-start justify-between gap-4">
         <div>
           <h1 className="text-3xl font-semibold">{recipe.title}</h1>

@@ -162,9 +162,9 @@ export default async function RecipePage() {
 
   if (!user) {
     return (
-      <div className="min-h-screen p-8">
-        <div className="mx-auto container rounded-3xl border border-border bg-card p-10 text-center shadow-sm">
-          <h1 className="text-2xl font-semibold">
+      <div>
+        <div className="rounded-3xl border border-border bg-card p-10 text-center shadow-sm">
+          <h1 className="text-3xl font-semibold">
             Sign in to manage your recipes
           </h1>
           <p className="mt-4 text-sm text-muted-foreground">
@@ -185,7 +185,7 @@ export default async function RecipePage() {
   });
 
   return (
-    <main className="mx-auto container px-4 py-8">
+    <main>
       <div className="mb-8">
         <div className="flex justify-between gap-6">
           <div className="space-y-4">
