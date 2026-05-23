@@ -54,21 +54,23 @@ export default function RecipeManager({
   return (
     <div className="grid gap-6 xl:grid-cols-[1.2fr_1fr]">
       <div className="space-y-6">
-        <CreateIngredientCard
-          onCreate={handleCreateIngredient}
-          disabled={isPending}
-        />
         <CreateRecipeCard
           ingredients={ingredients}
           createRecipeAction={handleCreateRecipe}
         />
       </div>
 
-      <IngredientsCard
-        ingredients={ingredients}
-        updateIngredientAction={handleUpdateIngredient}
-        deleteIngredientAction={handleDeleteIngredient}
-      />
+      <div className="space-y-6 grid content-start grid-rows-[auto_1fr]">
+        <CreateIngredientCard
+          onCreate={handleCreateIngredient}
+          disabled={isPending}
+        />
+        <IngredientsCard
+          ingredients={ingredients}
+          updateIngredientAction={handleUpdateIngredient}
+          deleteIngredientAction={handleDeleteIngredient}
+        />
+      </div>
     </div>
   );
 }

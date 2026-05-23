@@ -14,38 +14,39 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
-} from "@/components/ui/select";
 import { recipeIngredient } from "@/types/types";
+import {
+  Combobox,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxInput,
+  ComboboxItem,
+  ComboboxList,
+} from "@/components/ui/combobox";
 
 function IngredientSelect({
   allIngredients,
 }: {
   allIngredients: Ingredient[];
 }) {
-  const defaultId = allIngredients[0]?.id ?? "";
-  const [value, setValue] = useState<string>(defaultId);
-
   return (
     <div className="flex items-center gap-2">
-      <input type="hidden" name="ingredientId" value={value} />
-      <Select value={value} onValueChange={(v) => setValue(v)}>
-        <SelectTrigger>
-          <SelectValue placeholder={allIngredients[0]?.name ?? "Select"} />
-        </SelectTrigger>
-        <SelectContent>
-          {allIngredients.map((ing) => (
-            <SelectItem key={ing.id} value={ing.id}>
-              {ing.name}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+      <Combobox
+        items={allIngredients.map((ingredient) => ingredient.name)}
+        name="ingredientId"
+      >
+        <ComboboxInput placeholder="Select an ingredient" />
+        <ComboboxContent>
+          <ComboboxEmpty>No ingredients yet</ComboboxEmpty>
+          <ComboboxList>
+            {(item) => (
+              <ComboboxItem key={item} value={item}>
+                {item}
+              </ComboboxItem>
+            )}
+          </ComboboxList>
+        </ComboboxContent>
+      </Combobox>
     </div>
   );
 }

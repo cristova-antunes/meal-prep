@@ -143,7 +143,7 @@ export default async function MealPrepPage({
 
   const recipes = await prisma.recipe.findMany({
     where: { clerkId: user.id },
-    orderBy: { createdAt: "desc" },
+    orderBy: { title: "asc" },
     select: {
       id: true,
       title: true,

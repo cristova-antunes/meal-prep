@@ -115,7 +115,7 @@ export default function CreateRecipeCard({
               </div>
             </div>
 
-            <div className="space-y-3 rounded-xl border border-dashed border-border p-4">
+            <div className="space-y-3 rounded-xl border border-dashed border-border p-4 bg-neutral-100">
               <div className="flex items-center justify-between gap-4">
                 <h3 className="text-sm font-semibold">Recipe ingredients</h3>
                 <p className="text-sm text-muted-foreground mr-auto">
@@ -126,9 +126,7 @@ export default function CreateRecipeCard({
                   type="button"
                   variant="outline"
                   size="sm"
-                  onClick={() =>
-                    setIngredientRowCount((count) => Math.min(count + 1, 5))
-                  }
+                  onClick={() => setIngredientRowCount((count) => count + 1)}
                 >
                   Add row
                 </Button>
@@ -178,19 +176,6 @@ export default function CreateRecipeCard({
                   </div>
                 ))}
               </div>
-
-              {ingredientRowCount > 1 ? (
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() =>
-                    setIngredientRowCount((count) => Math.max(count - 1, 1))
-                  }
-                >
-                  Remove row
-                </Button>
-              ) : null}
             </div>
 
             <Button type="submit">Save recipe</Button>

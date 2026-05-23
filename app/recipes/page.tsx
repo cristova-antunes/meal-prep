@@ -4,6 +4,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import {
   Card,
+  CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
@@ -30,8 +31,15 @@ export default async function RecipesPage() {
   }
   const recipes = await prisma.recipe.findMany({
     where: { clerkId: user.id },
-    orderBy: { createdAt: "desc" },
-    select: { id: true, title: true, type: true, isCustom: true },
+    orderBy: { title: "asc" },
+    select: {
+      id: true,
+      title: true,
+      type: true,
+      isCustom: true,
+      instagramURL: true,
+      description: true,
+    },
   });
 
   return (
@@ -69,6 +77,24 @@ export default async function RecipesPage() {
                       </Badge>
                     )}
                   </CardDescription>
+                  <CardContent>
+                    {r.description ? (
+                      <p className="text-sm text-muted-foreground">
+                        {r.description}
+                      </p>
+                    ) : null}
+
+                    {r.instagramURL ? (
+                      <Link
+                        href={r.instagramURL}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm text-primary hover:underline"
+                      >
+                        View on Instagram
+                      </Link>
+                    ) : null}
+                  </CardContent>
                 </CardHeader>
               </Card>
             </li>

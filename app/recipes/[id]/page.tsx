@@ -121,7 +121,7 @@ export default async function RecipeDetailPage({
 
   const userIngredients = await prisma.ingredient.findMany({
     where: { clerkId: user.id },
-    orderBy: { createdAt: "desc" },
+    orderBy: { name: "asc" },
   });
 
   return (
