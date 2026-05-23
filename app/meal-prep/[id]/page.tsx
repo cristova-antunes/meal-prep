@@ -92,6 +92,89 @@ export default async function MealPrepDetailPage({
         </div>
       </div>
 
+      {/* Summary */}
+      <Card className="mb-4">
+        <CardHeader>
+          <CardTitle>Summary</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div>
+              <p className="text-sm text-muted-foreground">
+                Total Days Planned
+              </p>
+              <p className="text-3xl font-bold">
+                {weeklyMenu.recipes.filter((d) => d.recipes.length > 0).length}{" "}
+                / 7
+              </p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Total Recipes</p>
+              <p className="text-3xl font-bold">
+                {weeklyMenu.recipes.reduce(
+                  (sum, d) => sum + d.recipes.length,
+                  0,
+                )}
+              </p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Created</p>
+              <p className="text-sm font-medium">
+                {new Date(weeklyMenu.createdAt).toLocaleDateString()}
+              </p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Last Updated</p>
+              <p className="text-sm font-medium">
+                {new Date(weeklyMenu.updatedAt).toLocaleDateString()}
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle>Total ingredients used</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ul className="text-sm space-y-1 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {Object.entries(
+              weeklyMenu.recipes.reduce<
+                Record<string, { quantity: number; recipeCount: number }>
+              >((acc, daily) => {
+                daily.recipes.forEach((recipe) => {
+                  recipe.recipeIngredients.forEach((ri) => {
+                    const name = ri.ingredient.name;
+
+                    // Ensure we initialize
+                    if (!acc[name]) {
+                      acc[name] = { quantity: 0, recipeCount: 0 };
+                    }
+
+                    // Force TypeScript to treat quantity as a number if it's dynamic
+                    acc[name].quantity += Number(ri.quantity || 0);
+                    acc[name].recipeCount += 1;
+                  });
+                });
+                return acc;
+              }, {}),
+            )
+              // 1. Sort alphabetically by the ingredient name (the key)
+              .sort((a, b) => a[0].localeCompare(b[0]))
+              // 2. Map over the sorted array
+              .map(([ingredient, data]) => (
+                <li key={ingredient} className="flex flex-col gap-2">
+                  <span className="font-semibold">{ingredient}</span>
+                  <span className="text-muted-foreground">
+                    {data.quantity} from {data.recipeCount} recipes
+                  </span>
+                </li>
+              ))}
+          </ul>
+        </CardContent>
+      </Card>
+
       {/* Daily Menus Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {dailyMenusByDay.map(({ day, dailyMenu }) => (
@@ -160,47 +243,6 @@ export default async function MealPrepDetailPage({
           </Card>
         ))}
       </div>
-
-      {/* Summary */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Summary</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div>
-              <p className="text-sm text-muted-foreground">
-                Total Days Planned
-              </p>
-              <p className="text-3xl font-bold">
-                {weeklyMenu.recipes.filter((d) => d.recipes.length > 0).length}
-                /7
-              </p>
-            </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Total Recipes</p>
-              <p className="text-3xl font-bold">
-                {weeklyMenu.recipes.reduce(
-                  (sum, d) => sum + d.recipes.length,
-                  0,
-                )}
-              </p>
-            </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Created</p>
-              <p className="text-sm font-medium">
-                {new Date(weeklyMenu.createdAt).toLocaleDateString()}
-              </p>
-            </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Last Updated</p>
-              <p className="text-sm font-medium">
-                {new Date(weeklyMenu.updatedAt).toLocaleDateString()}
-              </p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 }

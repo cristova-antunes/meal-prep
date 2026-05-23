@@ -104,7 +104,7 @@ export default function CreateRecipeCard({
                 </Select>
               </div>
 
-              <div className="flex items-center gap-2 ">
+              <div className="flex items-end gap-2 ">
                 <Checkbox id="recipe-is-custom" name="isCustom" value="true" />
                 <label
                   className="text-sm font-medium text-muted-foreground"
@@ -118,6 +118,10 @@ export default function CreateRecipeCard({
             <div className="space-y-3 rounded-xl border border-dashed border-border p-4">
               <div className="flex items-center justify-between gap-4">
                 <h3 className="text-sm font-semibold">Recipe ingredients</h3>
+                <p className="text-sm text-muted-foreground mr-auto">
+                  {ingredients.length} total ingredient
+                  {ingredients.length === 1 ? "" : "s"}
+                </p>
                 <Button
                   type="button"
                   variant="outline"

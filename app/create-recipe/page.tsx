@@ -4,6 +4,7 @@ import { currentUser } from "@clerk/nextjs/server";
 import RecipeManager from "./RecipeManager";
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
+import { redirect } from "next/dist/client/components/navigation";
 
 async function createIngredient(formData: FormData) {
   "use server";
@@ -155,6 +156,8 @@ async function createRecipe(formData: FormData) {
       })),
     });
   }
+
+  redirect(`/recipes/${recipe.id}`);
 }
 
 export default async function RecipePage() {
