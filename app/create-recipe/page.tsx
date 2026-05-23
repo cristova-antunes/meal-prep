@@ -183,7 +183,7 @@ export default async function RecipePage() {
       clerkId: user.id,
     },
     orderBy: {
-      createdAt: "desc",
+      name: "asc",
     },
   });
 

@@ -17,7 +17,7 @@ export default function MenuNavigation() {
       <NavigationMenuList className="w-full">
         <NavigationMenuItem>
           <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
-            <Link href="/meal-prep">Meal Prep</Link>
+            <Link href="/">Meal Prep</Link>
           </NavigationMenuLink>
         </NavigationMenuItem>
         <NavigationMenuItem>

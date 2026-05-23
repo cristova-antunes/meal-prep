@@ -119,8 +119,8 @@ export default function CreateRecipeCard({
               <div className="flex items-center justify-between gap-4">
                 <h3 className="text-sm font-semibold">Recipe ingredients</h3>
                 <p className="text-sm text-muted-foreground mr-auto">
-                  {ingredients.length} total ingredient
-                  {ingredients.length === 1 ? "" : "s"}
+                  {ingredientRowCount} total ingredient
+                  {ingredientRowCount === 1 ? "" : "s"}
                 </p>
                 <Button
                   type="button"
