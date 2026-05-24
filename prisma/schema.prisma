@@ -15,6 +15,7 @@ model Recipe {
   instagramURL      String?
   isCustom          Boolean            @default(false)
   isFavorite        Boolean            @default(false)
+  thumbnailURL      String?
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt
   clerkId           String

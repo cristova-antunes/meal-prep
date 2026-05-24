@@ -82,6 +82,19 @@ export default function CreateRecipeCard({
                 placeholder="e.g. https://www.instagram.com/p/..."
               />
             </div>
+            <div>
+              <label
+                className="mb-2 block text-sm font-medium text-muted-foreground"
+                htmlFor="recipe-thumbnail-url"
+              >
+                Thumbnail URL
+              </label>
+              <Input
+                id="recipe-thumbnail-url"
+                name="thumbnailUrl"
+                placeholder="e.g. https://www.example.com/image.jpg"
+              />
+            </div>
             <div className="grid gap-4 md:grid-cols-2">
               <div>
                 <label

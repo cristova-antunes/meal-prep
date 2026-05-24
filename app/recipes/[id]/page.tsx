@@ -8,6 +8,7 @@ import IngredientsEditor from "../IngredientsEditor";
 import { ArrowLeft, ExternalLink } from "lucide-react";
 import RecipeTypeBadge from "@/components/feature/RecipeTypeBadge";
 import { Badge } from "@/components/ui/badge";
+import Image from "next/image";
 
 async function addIngredientToRecipe(formData: FormData) {
   "use server";
@@ -166,14 +167,23 @@ export default async function RecipeDetailPage({
         </div>
       </div>
 
-      <IngredientsEditor
-        recipeId={id}
-        recipeIngredients={recipe.recipeIngredients}
-        allIngredients={userIngredients}
-        addAction={addIngredientToRecipe}
-        removeAction={removeIngredientFromRecipe}
-        updateAction={updateIngredientQuantity}
-      />
+      <div className="flex gap-6">
+        {recipe.thumbnailURL ? (
+          <Image
+            src={recipe.thumbnailURL}
+            alt={`${recipe.title} thumbnail`}
+            className="w-48 h-48 object-cover rounded-md border"
+          />
+        ) : null}
+        <IngredientsEditor
+          recipeId={id}
+          recipeIngredients={recipe.recipeIngredients}
+          allIngredients={userIngredients}
+          addAction={addIngredientToRecipe}
+          removeAction={removeIngredientFromRecipe}
+          updateAction={updateIngredientQuantity}
+        />
+      </div>
     </main>
   );
 }

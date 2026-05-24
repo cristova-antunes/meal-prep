@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/card";
 import RecipeTypeBadge from "@/components/feature/RecipeTypeBadge";
 import { Badge } from "@/components/ui/badge";
+import Image from "next/image";
 
 export default async function RecipesPage() {
   const user = await currentUser();
@@ -38,6 +39,7 @@ export default async function RecipesPage() {
       type: true,
       isCustom: true,
       instagramURL: true,
+      thumbnailURL: true,
       description: true,
     },
   });
@@ -78,6 +80,16 @@ export default async function RecipesPage() {
                     )}
                   </CardDescription>
                   <CardContent>
+                    {r.thumbnailURL ? (
+                      <Image
+                        src={r.thumbnailURL}
+                        alt={`${r.title} thumbnail`}
+                        className="object-cover rounded-md border"
+                        width={192}
+                        height={192}
+                      />
+                    ) : null}
+
                     {r.description ? (
                       <p className="text-sm text-muted-foreground">
                         {r.description}
