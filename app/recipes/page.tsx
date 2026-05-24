@@ -11,7 +11,6 @@ import {
 } from "@/components/ui/card";
 import RecipeTypeBadge from "@/components/feature/RecipeTypeBadge";
 import { Badge } from "@/components/ui/badge";
-import Image from "next/image";
 
 export default async function RecipesPage() {
   const user = await currentUser();
@@ -81,7 +80,7 @@ export default async function RecipesPage() {
                   </CardDescription>
                   <CardContent>
                     {r.thumbnailURL ? (
-                      <Image
+                      <img
                         src={r.thumbnailURL}
                         alt={`${r.title} thumbnail`}
                         className="object-cover rounded-md border"
