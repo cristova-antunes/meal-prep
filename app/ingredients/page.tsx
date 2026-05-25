@@ -1,10 +1,9 @@
 import { currentUser } from "@clerk/nextjs/server";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
-import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { Prisma } from "@/app/generated/prisma/client";
-import { Input } from "@/components/ui/input";
+import IngredientsSearch from "./IngredientsSearch";
 
 export default async function IngredientsPage({
   searchParams,
@@ -61,20 +60,9 @@ export default async function IngredientsPage({
           </p>
         </div>
 
-        <form method="get" className="flex w-full max-w-sm items-center gap-2">
-          <Input
-            name="q"
-            placeholder="Search name"
-            defaultValue={typeof qParam === "string" ? qParam : ""}
-            className="input input-bordered w-full"
-          />
-          <button
-            type="submit"
-            className={buttonVariants({ variant: "default" })}
-          >
-            Search
-          </button>
-        </form>
+        <IngredientsSearch
+          initialQ={typeof qParam === "string" ? qParam : ""}
+        />
       </div>
 
       {ingredients.length === 0 ? (

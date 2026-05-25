@@ -12,15 +12,7 @@ import {
 } from "@/components/ui/card";
 import RecipeTypeBadge from "@/components/feature/RecipeTypeBadge";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import RecipeFilters from "./RecipeFilters";
 import { Heart } from "lucide-react";
 
 export default async function RecipesPage({
@@ -72,7 +64,7 @@ export default async function RecipesPage({
     where.title = { contains: qParam.trim(), mode: "insensitive" };
   }
 
-  if (typeParam && typeof typeParam === "string" && typeParam !== "") {
+  if (typeParam && typeof typeParam === "string" && typeParam !== "ALL") {
     where.type = typeParam as RecipeType;
   }
 
@@ -116,69 +108,13 @@ export default async function RecipesPage({
         </Link>
       </div>
 
-      <form method="get" className="mb-6 flex flex-col gap-3">
-        <div className="flex gap-2 items-center">
-          <Input
-            name="q"
-            placeholder="Search title"
-            defaultValue={typeof qParam === "string" ? qParam : ""}
-            className="input input-bordered w-full"
-          />
-          <Select
-            name="type"
-            defaultValue={typeof typeParam === "string" ? typeParam : ""}
-          >
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Type" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectItem value="all">All types</SelectItem>
-                <SelectItem value="MEAT">Meat</SelectItem>
-                <SelectItem value="FISH">Fish</SelectItem>
-                <SelectItem value="VEGETARIAN">Vegetarian</SelectItem>
-                <SelectItem value="DESSERT">Dessert</SelectItem>
-                <SelectItem value="SNACK">Snack</SelectItem>
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-          <button className={buttonVariants({ variant: "default" })}>
-            Filter
-          </button>
-        </div>
-
-        <div className="flex gap-4 items-center text-sm">
-          <label className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              name="customOnly"
-              defaultChecked={customOnly}
-              className="checkbox"
-            />
-            Custom only
-          </label>
-
-          <label className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              name="instagramOnly"
-              defaultChecked={instagramOnly}
-              className="checkbox"
-            />
-            Instagram only
-          </label>
-
-          <label className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              name="neverCooked"
-              defaultChecked={neverCooked}
-              className="checkbox"
-            />
-            Never cooked
-          </label>
-        </div>
-      </form>
+      <RecipeFilters
+        initialQ={typeof qParam === "string" ? qParam : ""}
+        initialType={typeof typeParam === "string" ? typeParam : "ALL"}
+        initialCustomOnly={customOnly}
+        initialInstagramOnly={instagramOnly}
+        initialNeverCooked={neverCooked}
+      />
 
       {recipes.length === 0 ? (
         <div className="rounded-md border border-border bg-card p-6 text-center">
