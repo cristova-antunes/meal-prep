@@ -41,6 +41,7 @@ export default function FavoriteToggle({
         className={buttonVariants({ variant: "outline", size: "sm" })}
       >
         <Heart
+          fill={isFavorite ? "currentColor" : "none"}
           className={`mr-1 ${
             isFavorite ? "text-amber-500" : "text-muted-foreground"
           }`}

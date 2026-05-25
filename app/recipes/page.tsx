@@ -21,6 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Heart } from "lucide-react";
 
 export default async function RecipesPage({
   searchParams,
@@ -99,6 +100,7 @@ export default async function RecipesPage({
       instagramURL: true,
       thumbnailURL: true,
       description: true,
+      isFavorite: true,
     },
   });
 
@@ -199,6 +201,15 @@ export default async function RecipesPage({
                       <Badge variant="outline" className="ml-2">
                         Custom
                       </Badge>
+                    )}
+                    {r.isFavorite && (
+                      <div className="inline-flex items-center ml-2 ">
+                        <Heart
+                          fill="currentColor"
+                          className="mr-1 text-amber-500"
+                        />
+                        <span className="text-sm">Favorite</span>
+                      </div>
                     )}
                   </CardDescription>
                   <CardContent>
