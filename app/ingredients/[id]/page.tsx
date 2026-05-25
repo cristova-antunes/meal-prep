@@ -14,9 +14,10 @@ import {
 export default async function IngredientDetailPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
   const user = await currentUser();
+  const resolvedParams = await params;
 
   if (!user) {
     return (
@@ -35,7 +36,7 @@ export default async function IngredientDetailPage({
 
   const ingredient = await prisma.ingredient.findFirst({
     where: {
-      id: params.id,
+      id: resolvedParams.id,
       clerkId: user.id,
     },
     select: {
