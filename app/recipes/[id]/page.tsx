@@ -238,6 +238,7 @@ export default async function RecipeDetailPage({
             <ArrowLeft className="mr-1" />
             Back
           </Link>
+
           <DeleteRecipeForm recipeId={id} deleteAction={deleteRecipe} />
         </div>
       </div>
