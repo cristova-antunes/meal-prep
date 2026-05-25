@@ -5,7 +5,8 @@ import { buttonVariants } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import DeleteRecipeForm from "../DeleteRecipeForm";
 import IngredientsEditor from "../IngredientsEditor";
-import { ArrowLeft, ExternalLink } from "lucide-react";
+import RecipeFeedbackForm from "../RecipeFeedbackForm";
+import { ArrowLeft, ExternalLink, Heart } from "lucide-react";
 import RecipeTypeBadge from "@/components/feature/RecipeTypeBadge";
 import { Badge } from "@/components/ui/badge";
 
@@ -76,6 +77,49 @@ async function updateIngredientQuantity(formData: FormData) {
   });
 }
 
+async function toggleFavorite(formData: FormData) {
+  "use server";
+  const user = await currentUser();
+  if (!user) throw new Error("You must be signed in to modify recipes.");
+
+  const recipeId = formData.get("recipeId")?.toString();
+  const isFavorite = formData.get("isFavorite")?.toString() === "true";
+
+  if (!recipeId) throw new Error("Missing recipe id.");
+
+  await prisma.recipe.updateMany({
+    where: { id: recipeId, clerkId: user.id },
+    data: { isFavorite: !isFavorite },
+  });
+}
+
+async function submitRecipeFeedback(formData: FormData) {
+  "use server";
+  const user = await currentUser();
+  if (!user) throw new Error("You must be signed in to submit feedback.");
+
+  const recipeId = formData.get("recipeId")?.toString();
+  const rating = parseInt(formData.get("rating")?.toString() || "0");
+  const easiness = parseInt(formData.get("easiness")?.toString() || "0");
+  const flavor = parseInt(formData.get("flavor")?.toString() || "0");
+  const comment = formData.get("comment")?.toString() || null;
+
+  if (!recipeId || !rating || !easiness || !flavor) {
+    throw new Error("Missing required feedback fields.");
+  }
+
+  await prisma.recipeFeedback.create({
+    data: {
+      recipeId,
+      rating,
+      easiness,
+      flavor,
+      comment,
+      clerkId: user.id,
+    },
+  });
+}
+
 export default async function RecipeDetailPage({
   params,
 }: {
@@ -103,6 +147,11 @@ export default async function RecipeDetailPage({
     where: { id },
     include: {
       recipeIngredients: { include: { ingredient: true } },
+      dailyMenus: {
+        include: {
+          weeklyMenus: true,
+        },
+      },
     },
   });
 
@@ -155,6 +204,25 @@ export default async function RecipeDetailPage({
           </div>
         </div>
         <div className="flex gap-2">
+          <form action={toggleFavorite} className="inline">
+            <input type="hidden" name="recipeId" value={id} />
+            <input
+              type="hidden"
+              name="isFavorite"
+              value={recipe.isFavorite ? "true" : "false"}
+            />
+            <button
+              type="submit"
+              className={buttonVariants({ variant: "outline", size: "sm" })}
+            >
+              <Heart
+                className={`mr-1 ${
+                  recipe.isFavorite ? "text-amber-500" : "text-muted-foreground"
+                }`}
+              />
+              {recipe.isFavorite ? "Unfavorite" : "Favorite"}
+            </button>
+          </form>
           <Link
             href="/recipes"
             className={buttonVariants({ variant: "outline", size: "sm" })}
@@ -167,13 +235,6 @@ export default async function RecipeDetailPage({
       </div>
 
       <div className="flex gap-6">
-        {recipe.thumbnailURL ? (
-          <img
-            src={recipe.thumbnailURL}
-            alt={`${recipe.title} thumbnail`}
-            className="w-48 h-48 object-cover rounded-md border"
-          />
-        ) : null}
         <IngredientsEditor
           recipeId={id}
           recipeIngredients={recipe.recipeIngredients}
@@ -183,6 +244,40 @@ export default async function RecipeDetailPage({
           updateAction={updateIngredientQuantity}
         />
       </div>
+
+      <div className="mt-8">
+        <RecipeFeedbackForm recipeId={id} submitAction={submitRecipeFeedback} />
+      </div>
+
+      {recipe.dailyMenus.length > 0 && (
+        <div className="mt-8">
+          <h2 className="text-2xl font-semibold mb-4">Used in Weekly Menus</h2>
+          <div className="grid gap-4">
+            {Array.from(
+              new Map(
+                recipe.dailyMenus
+                  .flatMap((dm) => dm.weeklyMenus)
+                  .map((wm) => [wm.id, wm]),
+              ).values(),
+            ).map((weeklyMenu) => (
+              <Card key={weeklyMenu.id} className="p-4">
+                <Link
+                  href={`/meal-prep/${weeklyMenu.id}`}
+                  className="flex justify-between items-center hover:opacity-80 transition-opacity"
+                >
+                  <div>
+                    <h3 className="font-semibold">{weeklyMenu.label}</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Week {weeklyMenu.week}, {weeklyMenu.year}
+                    </p>
+                  </div>
+                  <ExternalLink className="text-muted-foreground" />
+                </Link>
+              </Card>
+            ))}
+          </div>
+        </div>
+      )}
     </main>
   );
 }

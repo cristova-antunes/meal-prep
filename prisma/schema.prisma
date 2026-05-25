@@ -22,6 +22,21 @@ model Recipe {
   recipeIngredients RecipeIngredient[]
   dailyMenus        DailyMenu[]        @relation("DailyMenuToRecipe")
   ingredients       Ingredient[]       @relation("IngredientToRecipe")
+
+  recipeFeedbacks RecipeFeedback[]
+}
+
+model RecipeFeedback {
+  id        String   @id @default(uuid())
+  recipeId  String
+  rating    Int // e.g. 1 to 5
+  easiness  Int // e.g. 1 to 5
+  flavor    Int // e.g. 1 to 5
+  comment   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  clerkId   String
+  recipe    Recipe   @relation(fields: [recipeId], references: [id])
 }
 
 model Ingredient {

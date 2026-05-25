@@ -25,6 +25,11 @@ export default function MenuNavigation() {
             <Link href="/recipes">Recipes</Link>
           </NavigationMenuLink>
         </NavigationMenuItem>
+        <NavigationMenuItem>
+          <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
+            <Link href="/ingredients">Ingredients</Link>
+          </NavigationMenuLink>
+        </NavigationMenuItem>
         <NavigationMenuItem className="ml-auto">
           <UserButton showName />
         </NavigationMenuItem>
