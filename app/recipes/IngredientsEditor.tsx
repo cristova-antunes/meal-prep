@@ -33,7 +33,7 @@ function IngredientSelect({
     <div className="flex items-center gap-2">
       <Combobox
         items={allIngredients.map((ingredient) => ingredient.name)}
-        name="ingredientId"
+        name="ingredientName"
       >
         <ComboboxInput placeholder="Select an ingredient" />
         <ComboboxContent>

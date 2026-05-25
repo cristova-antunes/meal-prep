@@ -57,6 +57,7 @@ export default function RecipeManager({
         <CreateRecipeCard
           ingredients={ingredients}
           createRecipeAction={handleCreateRecipe}
+          disabled={isPending}
         />
       </div>
 

@@ -12,11 +12,20 @@ import {
 } from "@/components/ui/card";
 import RecipeTypeBadge from "@/components/feature/RecipeTypeBadge";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export default async function RecipesPage({
   searchParams,
 }: {
-  searchParams?: { [key: string]: string | string[] | undefined };
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
   const user = await currentUser();
 
@@ -35,24 +44,26 @@ export default async function RecipesPage({
     );
   }
   // Build filters from `searchParams` (GET query string)
-  const qParam = Array.isArray(searchParams?.q)
-    ? searchParams?.q[0]
-    : searchParams?.q;
-  const typeParam = Array.isArray(searchParams?.type)
-    ? searchParams?.type[0]
-    : searchParams?.type;
+  const searchParamsResolved = await searchParams;
+
+  const qParam = Array.isArray(searchParamsResolved?.q)
+    ? searchParamsResolved?.q[0]
+    : searchParamsResolved?.q;
+  const typeParam = Array.isArray(searchParamsResolved?.type)
+    ? searchParamsResolved?.type[0]
+    : searchParamsResolved?.type;
   const customOnly =
-    (Array.isArray(searchParams?.customOnly)
-      ? searchParams?.customOnly[0]
-      : searchParams?.customOnly) === "on";
+    (Array.isArray(searchParamsResolved?.customOnly)
+      ? searchParamsResolved?.customOnly[0]
+      : searchParamsResolved?.customOnly) === "on";
   const instagramOnly =
-    (Array.isArray(searchParams?.instagramOnly)
-      ? searchParams?.instagramOnly[0]
-      : searchParams?.instagramOnly) === "on";
+    (Array.isArray(searchParamsResolved?.instagramOnly)
+      ? searchParamsResolved?.instagramOnly[0]
+      : searchParamsResolved?.instagramOnly) === "on";
   const neverCooked =
-    (Array.isArray(searchParams?.neverCooked)
-      ? searchParams?.neverCooked[0]
-      : searchParams?.neverCooked) === "on";
+    (Array.isArray(searchParamsResolved?.neverCooked)
+      ? searchParamsResolved?.neverCooked[0]
+      : searchParamsResolved?.neverCooked) === "on";
 
   const where: Prisma.RecipeWhereInput = { clerkId: user.id };
 
@@ -105,24 +116,30 @@ export default async function RecipesPage({
 
       <form method="get" className="mb-6 flex flex-col gap-3">
         <div className="flex gap-2 items-center">
-          <input
+          <Input
             name="q"
             placeholder="Search title"
             defaultValue={typeof qParam === "string" ? qParam : ""}
             className="input input-bordered w-full"
           />
-          <select
+          <Select
             name="type"
             defaultValue={typeof typeParam === "string" ? typeParam : ""}
-            className="select select-bordered"
           >
-            <option value="">All types</option>
-            <option value="MEAT">Meat</option>
-            <option value="FISH">Fish</option>
-            <option value="VEGETARIAN">Vegetarian</option>
-            <option value="DESSERT">Dessert</option>
-            <option value="SNACK">Snack</option>
-          </select>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectItem value="all">All types</SelectItem>
+                <SelectItem value="MEAT">Meat</SelectItem>
+                <SelectItem value="FISH">Fish</SelectItem>
+                <SelectItem value="VEGETARIAN">Vegetarian</SelectItem>
+                <SelectItem value="DESSERT">Dessert</SelectItem>
+                <SelectItem value="SNACK">Snack</SelectItem>
+              </SelectGroup>
+            </SelectContent>
+          </Select>
           <button className={buttonVariants({ variant: "default" })}>
             Filter
           </button>

@@ -6,8 +6,9 @@ import { Card } from "@/components/ui/card";
 import DeleteRecipeForm from "../DeleteRecipeForm";
 import IngredientsEditor from "../IngredientsEditor";
 import RecipeFeedbackForm from "../RecipeFeedbackForm";
-import { ArrowLeft, ExternalLink, Heart } from "lucide-react";
+import { ArrowLeft, ExternalLink } from "lucide-react";
 import RecipeTypeBadge from "@/components/feature/RecipeTypeBadge";
+import FavoriteToggle from "../FavoriteToggle";
 import { Badge } from "@/components/ui/badge";
 
 async function addIngredientToRecipe(formData: FormData) {
@@ -16,18 +17,27 @@ async function addIngredientToRecipe(formData: FormData) {
   if (!user) throw new Error("You must be signed in to modify recipes.");
 
   const recipeId = formData.get("recipeId")?.toString();
-  const ingredientId = formData.get("ingredientId")?.toString();
+  const ingredientName = formData.get("ingredientName")?.toString();
   const quantity = (formData.get("quantity")?.toString() || "1").trim();
 
-  if (!recipeId || !ingredientId) throw new Error("Missing ids.");
+  if (!recipeId || !ingredientName) throw new Error("Missing ids.");
+  let ingredient = await prisma.ingredient.findFirst({
+    where: { name: ingredientName, clerkId: user.id },
+  });
+
+  if (!ingredient) {
+    ingredient = await prisma.ingredient.create({
+      data: { name: ingredientName, clerkId: user.id },
+    });
+  }
 
   await prisma.recipeIngredient.createMany({
     data: [
       {
         recipeId,
-        ingredientId,
+        ingredientId: ingredient.id,
         quantity,
-        clerkId: `${user.id}-${recipeId}-${ingredientId}`,
+        clerkId: `${user.id}`,
       },
     ],
   });
@@ -39,12 +49,18 @@ async function removeIngredientFromRecipe(formData: FormData) {
   if (!user) throw new Error("You must be signed in to modify recipes.");
 
   const recipeId = formData.get("recipeId")?.toString();
-  const ingredientId = formData.get("ingredientId")?.toString();
+  const ingredientName = formData.get("ingredientName")?.toString();
 
-  if (!recipeId || !ingredientId) throw new Error("Missing ids.");
+  if (!recipeId || !ingredientName) throw new Error("Missing ids.");
+
+  const ingredient = await prisma.ingredient.findFirst({
+    where: { name: ingredientName, clerkId: user.id },
+  });
+
+  if (!ingredient) throw new Error("Ingredient not found.");
 
   await prisma.recipeIngredient.deleteMany({
-    where: { recipeId, ingredientId },
+    where: { recipeId, ingredientId: ingredient.id },
   });
 }
 
@@ -66,13 +82,19 @@ async function updateIngredientQuantity(formData: FormData) {
   if (!user) throw new Error("You must be signed in to modify recipes.");
 
   const recipeId = formData.get("recipeId")?.toString();
-  const ingredientId = formData.get("ingredientId")?.toString();
+  const ingredientName = formData.get("ingredientName")?.toString();
   const quantity = (formData.get("quantity")?.toString() || "1").trim();
 
-  if (!recipeId || !ingredientId) throw new Error("Missing ids.");
+  if (!recipeId || !ingredientName) throw new Error("Missing ids.");
+
+  const ingredient = await prisma.ingredient.findFirst({
+    where: { name: ingredientName, clerkId: user.id },
+  });
+
+  if (!ingredient) throw new Error("Ingredient not found.");
 
   await prisma.recipeIngredient.updateMany({
-    where: { recipeId, ingredientId },
+    where: { recipeId, ingredientId: ingredient.id },
     data: { quantity },
   });
 }
@@ -204,25 +226,11 @@ export default async function RecipeDetailPage({
           </div>
         </div>
         <div className="flex gap-2">
-          <form action={toggleFavorite} className="inline">
-            <input type="hidden" name="recipeId" value={id} />
-            <input
-              type="hidden"
-              name="isFavorite"
-              value={recipe.isFavorite ? "true" : "false"}
-            />
-            <button
-              type="submit"
-              className={buttonVariants({ variant: "outline", size: "sm" })}
-            >
-              <Heart
-                className={`mr-1 ${
-                  recipe.isFavorite ? "text-amber-500" : "text-muted-foreground"
-                }`}
-              />
-              {recipe.isFavorite ? "Unfavorite" : "Favorite"}
-            </button>
-          </form>
+          <FavoriteToggle
+            recipeId={id}
+            isFavorite={recipe.isFavorite}
+            toggleFavorite={toggleFavorite}
+          />
           <Link
             href="/recipes"
             className={buttonVariants({ variant: "outline", size: "sm" })}

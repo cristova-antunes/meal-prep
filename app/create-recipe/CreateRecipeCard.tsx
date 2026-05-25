@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { FormEvent, useRef, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -26,11 +26,25 @@ import { recipeTypes } from "@/types/types";
 export default function CreateRecipeCard({
   ingredients,
   createRecipeAction,
+  disabled,
 }: {
   ingredients: Ingredient[];
   createRecipeAction: (formData: FormData) => Promise<void>;
+  disabled?: boolean;
 }) {
   const [ingredientRowCount, setIngredientRowCount] = useState(1);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const isSubmittingRef = useRef(false);
+
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    if (isSubmittingRef.current) {
+      event.preventDefault();
+      return;
+    }
+
+    isSubmittingRef.current = true;
+    setIsSubmitting(true);
+  }
 
   return (
     <section>
@@ -39,7 +53,11 @@ export default function CreateRecipeCard({
           <CardTitle>Create recipe</CardTitle>
         </CardHeader>
         <CardContent>
-          <form action={createRecipeAction} className="space-y-4">
+          <form
+            action={createRecipeAction}
+            onSubmit={handleSubmit}
+            className="space-y-4"
+          >
             <div>
               <label
                 className="mb-2 block text-sm font-medium text-muted-foreground"
@@ -191,7 +209,9 @@ export default function CreateRecipeCard({
               </div>
             </div>
 
-            <Button type="submit">Save recipe</Button>
+            <Button type="submit" disabled={disabled || isSubmitting}>
+              Save recipe
+            </Button>
           </form>
         </CardContent>
       </Card>
