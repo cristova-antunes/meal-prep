@@ -8,6 +8,7 @@ import IngredientsEditor from "../IngredientsEditor";
 import RecipeFeedbackForm from "../RecipeFeedbackForm";
 import { ArrowLeft, ExternalLink } from "lucide-react";
 import RecipeTypeBadge from "@/components/feature/RecipeTypeBadge";
+import RecipeHealthAnalyzer from "@/components/feature/RecipeHealthAnalyzer";
 import FavoriteToggle from "../FavoriteToggle";
 import { Badge } from "@/components/ui/badge";
 
@@ -253,6 +254,8 @@ export default async function RecipeDetailPage({
           updateAction={updateIngredientQuantity}
         />
       </div>
+
+      <RecipeHealthAnalyzer recipeIngredients={recipe.recipeIngredients} />
 
       <div className="mt-8">
         <RecipeFeedbackForm recipeId={id} submitAction={submitRecipeFeedback} />
