@@ -112,7 +112,7 @@ export default function RecipeHealthAnalyzer({ recipeIngredients }: Props) {
   const analysis = getHealthAnalyis(recipeIngredients);
 
   return (
-    <Card className="mt-6">
+    <Card>
       <CardHeader>
         <CardTitle>Recipe health analyzer</CardTitle>
         <CardDescription>

@@ -197,8 +197,8 @@ export default async function RecipeDetailPage({
   });
 
   return (
-    <main className="">
-      <div className="mb-6 flex items-start justify-between gap-4">
+    <main className="space-y-6">
+      <div className="flex items-start justify-between gap-4">
         <div>
           <h1 className="text-3xl font-semibold">{recipe.title}</h1>
           {recipe.description ? (
@@ -244,7 +244,9 @@ export default async function RecipeDetailPage({
         </div>
       </div>
 
-      <div className="flex gap-6">
+      <RecipeHealthAnalyzer recipeIngredients={recipe.recipeIngredients} />
+
+      <div className="grid md:grid-cols-2 gap-6">
         <IngredientsEditor
           recipeId={id}
           recipeIngredients={recipe.recipeIngredients}
@@ -253,16 +255,11 @@ export default async function RecipeDetailPage({
           removeAction={removeIngredientFromRecipe}
           updateAction={updateIngredientQuantity}
         />
-      </div>
-
-      <RecipeHealthAnalyzer recipeIngredients={recipe.recipeIngredients} />
-
-      <div className="mt-8">
         <RecipeFeedbackForm recipeId={id} submitAction={submitRecipeFeedback} />
       </div>
 
       {recipe.dailyMenus.length > 0 && (
-        <div className="mt-8">
+        <div>
           <h2 className="text-2xl font-semibold mb-4">Used in Weekly Menus</h2>
           <div className="grid gap-4">
             {Array.from(

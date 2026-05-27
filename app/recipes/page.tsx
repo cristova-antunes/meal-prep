@@ -126,7 +126,7 @@ export default async function RecipesPage({
         <ul className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
           {recipes.map((r) => (
             <li key={r.id}>
-              <Card>
+              <Card className="h-full">
                 <CardHeader>
                   <CardTitle>
                     <Link href={`/recipes/${r.id}`}>{r.title}</Link>
@@ -148,25 +148,25 @@ export default async function RecipesPage({
                       </div>
                     )}
                   </CardDescription>
-                  <CardContent>
-                    {r.description ? (
-                      <p className="text-sm text-muted-foreground">
-                        {r.description}
-                      </p>
-                    ) : null}
-
-                    {r.instagramURL ? (
-                      <Link
-                        href={r.instagramURL}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-sm text-primary hover:underline"
-                      >
-                        View on Instagram
-                      </Link>
-                    ) : null}
-                  </CardContent>
                 </CardHeader>
+                <CardContent>
+                  {r.description ? (
+                    <p className="text-sm text-muted-foreground">
+                      {r.description}
+                    </p>
+                  ) : null}
+
+                  {r.instagramURL ? (
+                    <Link
+                      href={r.instagramURL}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm text-primary hover:underline"
+                    >
+                      View on Instagram
+                    </Link>
+                  ) : null}
+                </CardContent>
               </Card>
             </li>
           ))}

@@ -34,7 +34,7 @@ export default async function Page() {
         <ul className="space-y-3 grid sm:grid-cols-2 md:grid-cols-3 gap-4 ">
           {weeks.map((w) => (
             <li key={w.id}>
-              <Card>
+              <Card className="full-height">
                 <CardHeader>
                   <CardTitle>
                     <Link href={`/meal-prep/${w.id}`}>

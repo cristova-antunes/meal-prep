@@ -68,21 +68,17 @@ export default async function IngredientDetailPage({
   return (
     <main>
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-3xl font-semibold">{ingredient.name}</h1>
-            {ingredient.type ? (
-              <IngredientBadge type={ingredient.type} />
-            ) : null}
-          </div>
-          <Link
-            href="/ingredients"
-            className={buttonVariants({ variant: "outline" })}
-          >
-            <ArrowLeft className="mr-1" />
-            Back
-          </Link>
+        <div className="flex flex-wrap items-center gap-3">
+          <h1 className="text-3xl font-semibold">{ingredient.name}</h1>
+          {ingredient.type ? <IngredientBadge type={ingredient.type} /> : null}
         </div>
+        <Link
+          href="/ingredients"
+          className={buttonVariants({ variant: "outline" })}
+        >
+          <ArrowLeft className="mr-1" />
+          Back
+        </Link>
       </div>
 
       <Card className="mt-6">

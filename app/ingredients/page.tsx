@@ -1,9 +1,16 @@
 import { currentUser } from "@clerk/nextjs/server";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import type { Prisma } from "@/app/generated/prisma/client";
 import IngredientsSearch from "./IngredientsSearch";
+import IngredientBadge from "@/components/feature/IngredientBadge";
 
 export default async function IngredientsPage({
   searchParams,
@@ -47,6 +54,7 @@ export default async function IngredientsPage({
     select: {
       id: true,
       name: true,
+      type: true,
     },
   });
 
@@ -72,10 +80,10 @@ export default async function IngredientsPage({
           </p>
         </div>
       ) : (
-        <ul className="grid gap-4 sm:grid-cols-2">
+        <ul className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
           {ingredients.map((ingredient) => (
             <li key={ingredient.id}>
-              <Card>
+              <Card className="h-full">
                 <CardHeader>
                   <CardTitle>
                     <Link
@@ -85,6 +93,12 @@ export default async function IngredientsPage({
                       {ingredient.name}
                     </Link>
                   </CardTitle>
+
+                  {ingredient.type && (
+                    <CardDescription>
+                      <IngredientBadge type={ingredient.type} />
+                    </CardDescription>
+                  )}
                 </CardHeader>
                 <CardContent>
                   <Link
