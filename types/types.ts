@@ -33,3 +33,30 @@ export type RecipeWithIngredients = Recipe & {
     quantity: string;
   }>;
 };
+
+export const ingredientType = [
+  { value: "Protein", label: "Protein", colors: "bg-amber-100 text-amber-800" },
+  { value: "Carbs", label: "Carbs", colors: "bg-cyan-100 text-cyan-800" },
+  { value: "Legumes", label: "Legumes", colors: "bg-green-100 text-green-800" },
+  {
+    value: "Vegetable",
+    label: "Vegetable",
+    colors: "bg-emerald-100 text-emerald-800",
+  },
+  { value: "Fruit", label: "Fruit", colors: "bg-rose-100 text-rose-800" },
+  {
+    value: "FatsAndDairy",
+    label: "Fats & Dairy",
+    colors: "bg-slate-100 text-slate-800",
+  },
+  {
+    value: "Condiments",
+    label: "Condiments",
+    colors: "bg-violet-100 text-violet-800",
+  },
+  {
+    value: "ReadyMeals",
+    label: "Ready meals",
+    colors: "bg-yellow-100 text-yellow-800",
+  },
+] as const;

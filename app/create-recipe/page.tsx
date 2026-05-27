@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import type { Recipe } from "@/app/generated/prisma/client";
+import type { Ingredient, Recipe } from "@/app/generated/prisma/client";
 import { currentUser } from "@clerk/nextjs/server";
 import RecipeManager from "./RecipeManager";
 import Link from "next/link";
@@ -17,6 +17,7 @@ async function createIngredient(formData: FormData) {
   const name = (formData.get("name") ?? formData.get("ingredient-name"))
     ?.toString()
     .trim();
+  const type = formData.get("type")?.toString().trim() || null;
 
   if (!name) {
     throw new Error("Ingredient name is required.");
@@ -26,6 +27,7 @@ async function createIngredient(formData: FormData) {
     data: {
       name,
       clerkId: user.id,
+      ...(type ? { type: type as Ingredient["type"] } : {}),
     },
   });
 }
@@ -42,9 +44,18 @@ async function updateIngredient(formData: FormData) {
     ?.toString()
     .trim();
   const id = formData.get("ingredientId")?.toString();
+  const type = formData.get("type")?.toString().trim();
 
   if (!id || !name) {
     throw new Error("Ingredient id and name are required.");
+  }
+
+  const updateData: { name: string; type?: Ingredient["type"] | null } = {
+    name,
+  };
+
+  if (type) {
+    updateData.type = type as Ingredient["type"];
   }
 
   await prisma.ingredient.updateMany({
@@ -52,9 +63,7 @@ async function updateIngredient(formData: FormData) {
       id,
       clerkId: user.id,
     },
-    data: {
-      name,
-    },
+    data: updateData,
   });
 }
 

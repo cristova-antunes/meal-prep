@@ -85,6 +85,33 @@ function buildWeekLabel(start: Date) {
   return `${formatSlotLabel(start)} to ${formatSlotLabel(weekEnd)}`;
 }
 
+function getSundayForWeekYear(week: number, year: number) {
+  const simple = new Date(Date.UTC(year, 0, 1));
+  const dayOfWeek = simple.getUTCDay() || 7;
+  const isoWeekStart = new Date(simple);
+  isoWeekStart.setUTCDate(simple.getUTCDate() + 4 - dayOfWeek + (week - 1) * 7);
+  isoWeekStart.setUTCHours(0, 0, 0, 0);
+
+  const sunday = addDays(isoWeekStart, -1);
+  sunday.setUTCHours(0, 0, 0, 0);
+  return sunday;
+}
+
+function getWeekStartForWeeklyMenu(weeklyMenu: {
+  week: number;
+  year: number;
+  recipes: { date: Date }[];
+}) {
+  const dates = weeklyMenu.recipes.map((menu) => new Date(menu.date));
+  if (dates.length > 0) {
+    const earliest = new Date(Math.min(...dates.map((date) => date.getTime())));
+    earliest.setHours(0, 0, 0, 0);
+    return earliest;
+  }
+
+  return getSundayForWeekYear(weeklyMenu.week, weeklyMenu.year);
+}
+
 function buildCandidateWeeks(
   start: Date,
   weeklyMenus: Array<{
@@ -187,6 +214,20 @@ export default async function MealPrepPage({
     ? candidates.find((candidate) => candidate.existing?.id === selectedWeekId)
     : undefined;
 
+  const selectedWeeklyMenuById =
+    selectedWeekId && !selectedMenuById
+      ? await prisma.weeklyMenu.findUnique({
+          where: { id: selectedWeekId },
+          include: {
+            recipes: {
+              include: {
+                recipes: true,
+              },
+            },
+          },
+        })
+      : undefined;
+
   const selectedCandidateFromQuery = !selectedWeekId
     ? candidates.find(
         (candidate) =>
@@ -201,18 +242,21 @@ export default async function MealPrepPage({
   const selectedCandidate =
     selectedMenuById ?? selectedCandidateFromQuery ?? nextAvailableCandidate;
 
-  const weeklyMenu = selectedCandidate.existing
-    ? selectedCandidate.existing
-    : await getOrCreateWeeklyMenu(
-        selectedCandidate.week,
-        selectedCandidate.year,
-        selectedCandidate.weekStart,
-        selectedCandidate.weekEnd,
-      );
+  const weeklyMenu =
+    selectedMenuById?.existing ??
+    selectedWeeklyMenuById ??
+    (await getOrCreateWeeklyMenu(
+      selectedCandidate.week,
+      selectedCandidate.year,
+      selectedCandidate.weekStart,
+      selectedCandidate.weekEnd,
+    ));
 
-  const selectedValue = selectedCandidate.existing
-    ? `id:${selectedCandidate.existing.id}`
-    : `week:${selectedCandidate.week}:${selectedCandidate.year}`;
+  const selectedValue = selectedWeekId
+    ? `id:${selectedWeekId}`
+    : selectedCandidate.existing
+      ? `id:${selectedCandidate.existing.id}`
+      : `week:${selectedCandidate.week}:${selectedCandidate.year}`;
 
   const weekOptions = candidates.map((candidate, index) => ({
     value: candidate.existing
@@ -226,17 +270,27 @@ export default async function MealPrepPage({
         : `Create week ${candidate.week} — ${candidate.year}`,
   }));
 
+  const extraSelectedWeekOption = selectedWeeklyMenuById
+    ? {
+        value: `id:${selectedWeeklyMenuById.id}`,
+        label: selectedWeeklyMenuById.label,
+        description: `Selected existing week ${selectedWeeklyMenuById.week} — ${selectedWeeklyMenuById.year}`,
+      }
+    : selectedMenuById
+      ? {
+          value: `id:${selectedMenuById.existing!.id}`,
+          label: selectedMenuById.existing!.label,
+          description: `Selected existing week ${selectedMenuById.existing!.week} — ${selectedMenuById.existing!.year}`,
+        }
+      : undefined;
+
   if (
-    selectedMenuById &&
+    extraSelectedWeekOption &&
     !weekOptions.some(
-      (option) => option.value === `id:${selectedMenuById.existing?.id}`,
+      (option) => option.value === extraSelectedWeekOption.value,
     )
   ) {
-    weekOptions.unshift({
-      value: `id:${selectedMenuById.existing!.id}`,
-      label: selectedMenuById.existing!.label,
-      description: `Selected existing week ${selectedMenuById.existing!.week} — ${selectedMenuById.existing!.year}`,
-    });
+    weekOptions.unshift(extraSelectedWeekOption);
   }
 
   if (recipeItems.length === 0) {
@@ -260,11 +314,15 @@ export default async function MealPrepPage({
   }
 
   const prepSlots = buildPrepSlots(
-    selectedCandidate.weekStart,
+    selectedWeeklyMenuById
+      ? getWeekStartForWeeklyMenu(weeklyMenu)
+      : selectedCandidate.weekStart,
     weeklyMenu.recipes,
   );
 
-  const [weekStartLabel, weekEndLabel] = selectedCandidate.label.split(" to ");
+  const [weekStartLabel, weekEndLabel] = selectedWeeklyMenuById
+    ? weeklyMenu.label.split(" to ")
+    : selectedCandidate.label.split(" to ");
 
   return (
     <main>
