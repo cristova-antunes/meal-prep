@@ -1,4 +1,3 @@
-import { IngredientType } from "@/app/generated/prisma/enums";
 import { Badge } from "@/components/ui/badge";
 import {
   Card,
@@ -7,109 +6,15 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-
-type RecipeIngredientWithIngredient = {
-  ingredient: {
-    id: string;
-    name: string;
-    type?: IngredientType | null;
-  };
-  quantity: string;
-};
+import { getRecipeHealthAnalysis } from "@/lib/recipe-health";
+import type { RecipeIngredientWithIngredient } from "@/lib/recipe-health";
 
 type Props = {
   recipeIngredients: RecipeIngredientWithIngredient[];
 };
 
-function getHealthAnalyis(recipeIngredients: RecipeIngredientWithIngredient[]) {
-  const ingredientTypes = new Map<string, IngredientType | null>();
-
-  recipeIngredients.forEach(({ ingredient }) => {
-    if (!ingredientTypes.has(ingredient.id)) {
-      ingredientTypes.set(ingredient.id, ingredient.type ?? null);
-    }
-  });
-
-  let proteinOrLegumes = 0;
-  let carbs = 0;
-  let vegetalOrFruit = 0;
-  let missingType = 0;
-
-  Array.from(ingredientTypes.values()).forEach((type) => {
-    if (type === "Protein" || type === "Legumes") {
-      proteinOrLegumes += 1;
-    }
-    if (type === "Carbs") {
-      carbs += 1;
-    }
-    if (type === "Vegetable" || type === "Fruit") {
-      vegetalOrFruit += 1;
-    }
-    if (type == null) {
-      missingType += 1;
-    }
-  });
-
-  const hasProteinOrLegumes = proteinOrLegumes >= 1;
-  const hasCarbs = carbs >= 1;
-  const hasVegetalOrFruit = vegetalOrFruit >= 1 && vegetalOrFruit <= 2;
-  const hasTooManyVegetalOrFruit = vegetalOrFruit > 2;
-
-  let status: "good" | "almost" | "needs-improvement" = "needs-improvement";
-  if (hasProteinOrLegumes && hasCarbs && hasVegetalOrFruit) {
-    status = "good";
-  } else if (hasProteinOrLegumes && hasCarbs && vegetalOrFruit >= 1) {
-    status = "almost";
-  }
-
-  const badgeVariant: "default" | "secondary" | "destructive" =
-    status === "good"
-      ? "default"
-      : status === "almost"
-        ? "secondary"
-        : "destructive";
-
-  const message =
-    status === "good"
-      ? "This recipe is balanced by the healthiness rules."
-      : status === "almost"
-        ? "This recipe is close to balanced. Adjust the vegetable/fruit count to match the ideal range."
-        : "This recipe needs better balance. Add or adjust ingredients to meet the healthiness rules.";
-
-  const suggestions: string[] = [];
-  if (!hasProteinOrLegumes) {
-    suggestions.push("Add at least one Protein or Legumes ingredient.");
-  }
-  if (!hasCarbs) {
-    suggestions.push("Add at least one Carbs ingredient.");
-  }
-  if (!hasVegetalOrFruit) {
-    suggestions.push("Add one or two Vegetable or Fruit ingredients.");
-  } else if (hasTooManyVegetalOrFruit) {
-    suggestions.push(
-      "Reduce Vegetable/Fruit ingredients to one or two for the healthiest balance.",
-    );
-  }
-  if (missingType > 0) {
-    suggestions.push(
-      `There are ${missingType} ingredient${missingType === 1 ? "" : "s"} without a type. Type them to improve the analysis.`,
-    );
-  }
-
-  return {
-    status,
-    badgeVariant,
-    message,
-    proteinOrLegumes,
-    carbs,
-    vegetalOrFruit,
-    missingType,
-    suggestions,
-  };
-}
-
 export default function RecipeHealthAnalyzer({ recipeIngredients }: Props) {
-  const analysis = getHealthAnalyis(recipeIngredients);
+  const analysis = getRecipeHealthAnalysis(recipeIngredients);
 
   return (
     <Card>

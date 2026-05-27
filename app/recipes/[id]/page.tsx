@@ -1,6 +1,10 @@
 import { currentUser } from "@clerk/nextjs/server";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
+import {
+  getRecipeHealthStatus,
+  toPrismaRecipeHealthStatus,
+} from "@/lib/recipe-health";
 import { buttonVariants } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import DeleteRecipeForm from "../DeleteRecipeForm";
@@ -42,6 +46,20 @@ async function addIngredientToRecipe(formData: FormData) {
       },
     ],
   });
+
+  const recipeIngredientRows = await prisma.recipeIngredient.findMany({
+    where: { recipeId },
+    include: { ingredient: true },
+  });
+
+  await prisma.recipe.updateMany({
+    where: { id: recipeId, clerkId: user.id },
+    data: {
+      healthStatus: toPrismaRecipeHealthStatus(
+        getRecipeHealthStatus(recipeIngredientRows),
+      ),
+    },
+  });
 }
 
 async function removeIngredientFromRecipe(formData: FormData) {
@@ -62,6 +80,20 @@ async function removeIngredientFromRecipe(formData: FormData) {
 
   await prisma.recipeIngredient.deleteMany({
     where: { recipeId, ingredientId: ingredient.id },
+  });
+
+  const recipeIngredientRows = await prisma.recipeIngredient.findMany({
+    where: { recipeId },
+    include: { ingredient: true },
+  });
+
+  await prisma.recipe.updateMany({
+    where: { id: recipeId, clerkId: user.id },
+    data: {
+      healthStatus: toPrismaRecipeHealthStatus(
+        getRecipeHealthStatus(recipeIngredientRows),
+      ),
+    },
   });
 }
 
