@@ -126,7 +126,7 @@ export default async function RecipesPage({
         <ul className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
           {recipes.map((r) => (
             <li key={r.id}>
-              <Card className="h-full">
+              <Card className="h-full justify-between">
                 <CardHeader>
                   <CardTitle>
                     <Link href={`/recipes/${r.id}`}>{r.title}</Link>

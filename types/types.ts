@@ -57,6 +57,6 @@ export const ingredientType = [
   {
     value: "ReadyMeals",
     label: "Ready meals",
-    colors: "bg-yellow-100 text-yellow-800",
+    colors: "bg-mauve-100 text-mauve-800",
   },
 ] as const;
