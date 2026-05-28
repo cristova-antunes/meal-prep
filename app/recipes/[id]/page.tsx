@@ -14,6 +14,7 @@ import { ArrowLeft, ExternalLink } from "lucide-react";
 import RecipeTypeBadge from "@/components/feature/RecipeTypeBadge";
 import RecipeHealthAnalyzer from "@/components/feature/RecipeHealthAnalyzer";
 import FavoriteToggle from "../FavoriteToggle";
+import EditRecipeForm from "../EditRecipeForm";
 import { Badge } from "@/components/ui/badge";
 
 async function addIngredientToRecipe(formData: FormData) {
@@ -175,6 +176,25 @@ async function submitRecipeFeedback(formData: FormData) {
   });
 }
 
+async function updateRecipe(formData: FormData) {
+  "use server";
+  const user = await currentUser();
+  if (!user) throw new Error("You must be signed in to modify recipes.");
+
+  const recipeId = formData.get("recipeId")?.toString();
+  const title = formData.get("title")?.toString()?.trim();
+  const description = formData.get("description")?.toString()?.trim() || null;
+
+  if (!recipeId || !title) {
+    throw new Error("Recipe name is required.");
+  }
+
+  await prisma.recipe.updateMany({
+    where: { id: recipeId, clerkId: user.id },
+    data: { title, description },
+  });
+}
+
 export default async function RecipeDetailPage({
   params,
 }: {
@@ -263,6 +283,12 @@ export default async function RecipeDetailPage({
             recipeId={id}
             isFavorite={recipe.isFavorite}
             toggleFavorite={toggleFavorite}
+          />
+          <EditRecipeForm
+            recipeId={id}
+            title={recipe.title}
+            description={recipe.description}
+            updateAction={updateRecipe}
           />
           <Link
             href="/recipes"

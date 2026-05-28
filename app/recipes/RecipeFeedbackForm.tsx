@@ -11,11 +11,23 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
+import { Trash2 } from "lucide-react";
+
+interface FeedbackEntry {
+  id: string;
+  rating: number;
+  easiness: number;
+  flavor: number;
+  timeSpent: string;
+  comment: string;
+  timestamp: Date;
+}
 
 interface RecipeFeedbackFormProps {
   recipeId: string;
-  submitAction: (formData: FormData) => Promise<void>;
+  submitAction?: (formData: FormData) => Promise<void>;
 }
 
 export default function RecipeFeedbackForm({
@@ -25,13 +37,15 @@ export default function RecipeFeedbackForm({
   const [rating, setRating] = useState<string>("");
   const [easiness, setEasiness] = useState<string>("");
   const [flavor, setFlavor] = useState<string>("");
+  const [timeSpent, setTimeSpent] = useState<string>("");
   const [comment, setComment] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [feedbackEntries, setFeedbackEntries] = useState<FeedbackEntry[]>([]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    if (!rating || !easiness || !flavor) {
+    if (!rating || !easiness || !flavor || !timeSpent) {
       toast.error("Please fill in all required fields");
       return;
     }
@@ -39,33 +53,53 @@ export default function RecipeFeedbackForm({
     setIsSubmitting(true);
 
     try {
-      const formData = new FormData();
-      formData.append("recipeId", recipeId);
-      formData.append("rating", rating);
-      formData.append("easiness", easiness);
-      formData.append("flavor", flavor);
-      formData.append("comment", comment);
+      const newEntry: FeedbackEntry = {
+        id: Date.now().toString(),
+        rating: parseInt(rating),
+        easiness: parseInt(easiness),
+        flavor: parseInt(flavor),
+        timeSpent,
+        comment,
+        timestamp: new Date(),
+      };
 
-      await submitAction(formData);
+      setFeedbackEntries([newEntry, ...feedbackEntries]);
 
-      toast.success("Feedback submitted successfully!");
+      // Optionally send to backend if action is provided
+      if (submitAction) {
+        const formData = new FormData();
+        formData.append("recipeId", recipeId);
+        formData.append("rating", rating);
+        formData.append("easiness", easiness);
+        formData.append("flavor", flavor);
+        formData.append("comment", comment);
+        await submitAction(formData);
+      }
+
+      toast.success("Feedback saved!");
       setRating("");
       setEasiness("");
       setFlavor("");
+      setTimeSpent("");
       setComment("");
     } catch (error) {
-      toast.error("Failed to submit feedback");
+      toast.error("Failed to save feedback");
       console.error(error);
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  const removeFeedbackEntry = (id: string) => {
+    setFeedbackEntries(feedbackEntries.filter((entry) => entry.id !== id));
+    toast.success("Feedback entry removed");
+  };
+
   return (
     <Card className="p-6 shadow-sm">
-      <h2 className="text-xl font-semibold mb-4">Recipe Feedback</h2>
+      <h2 className="text-xl font-semibold mb-4">Recipe Feedback & Notes</h2>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-4 mb-6">
         <div>
           <label htmlFor="rating" className="block text-sm font-medium mb-2">
             Rating <span className="text-red-500">*</span>
@@ -121,6 +155,19 @@ export default function RecipeFeedbackForm({
         </div>
 
         <div>
+          <label htmlFor="timeSpent" className="block text-sm font-medium mb-2">
+            Time Spent <span className="text-red-500">*</span>
+          </label>
+          <Input
+            id="timeSpent"
+            type="text"
+            placeholder="e.g., 30 mins, 1.5 hours"
+            value={timeSpent}
+            onChange={(e) => setTimeSpent(e.target.value)}
+          />
+        </div>
+
+        <div>
           <label htmlFor="comment" className="block text-sm font-medium mb-2">
             Comment (Optional)
           </label>
@@ -135,9 +182,61 @@ export default function RecipeFeedbackForm({
         </div>
 
         <Button type="submit" disabled={isSubmitting} className="w-full">
-          {isSubmitting ? "Submitting..." : "Submit Feedback"}
+          {isSubmitting ? "Saving..." : "Save Feedback"}
         </Button>
       </form>
+
+      {feedbackEntries.length > 0 && (
+        <div className="space-y-3 border-t pt-6">
+          <h3 className="text-sm font-semibold text-muted-foreground">
+            Your Feedback Notes ({feedbackEntries.length})
+          </h3>
+          <div className="space-y-3">
+            {feedbackEntries.map((entry) => (
+              <div
+                key={entry.id}
+                className="bg-muted/50 rounded-lg p-4 space-y-2"
+              >
+                <div className="flex justify-between items-start gap-2">
+                  <div className="flex gap-3 text-sm flex-wrap">
+                    <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-medium">
+                      Rating: {entry.rating}/5
+                    </span>
+                    <span className="bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-medium">
+                      Easiness: {entry.easiness}/5
+                    </span>
+                    <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded text-xs font-medium">
+                      Flavor: {entry.flavor}/5
+                    </span>
+                    <span className="bg-orange-100 text-orange-800 px-2 py-1 rounded text-xs font-medium">
+                      ⏱ {entry.timeSpent}
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => removeFeedbackEntry(entry.id)}
+                    className="text-muted-foreground hover:text-destructive transition-colors"
+                    title="Remove feedback entry"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+                {entry.comment && (
+                  <p className="text-sm text-muted-foreground italic">
+                    &quot;{entry.comment}&quot;
+                  </p>
+                )}
+                <p className="text-xs text-muted-foreground">
+                  {entry.timestamp.toLocaleDateString()} at{" "}
+                  {entry.timestamp.toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </Card>
   );
 }
