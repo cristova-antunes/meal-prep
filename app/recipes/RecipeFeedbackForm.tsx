@@ -25,14 +25,48 @@ interface FeedbackEntry {
   timestamp: Date;
 }
 
+interface InitialFeedback {
+  id: string;
+  rating: number;
+  easiness: number;
+  flavor: number;
+  timeSpent: string | number | null;
+  comment: string | null;
+  createdAt?: string | Date;
+  updatedAt?: string | Date;
+}
+
 interface RecipeFeedbackFormProps {
   recipeId: string;
   submitAction?: (formData: FormData) => Promise<void>;
+  initialFeedbacks?: InitialFeedback[];
+  updateAction?: (formData: FormData) => Promise<void>;
+  deleteAction?: (formData: FormData) => Promise<void>;
 }
+
+const mapInitialFeedbacks = (
+  initialFeedbacks?: InitialFeedback[],
+): FeedbackEntry[] =>
+  initialFeedbacks?.map((fb) => ({
+    id: fb.id || Date.now().toString(),
+    rating: fb.rating ?? 0,
+    easiness: fb.easiness ?? 0,
+    flavor: fb.flavor ?? 0,
+    timeSpent: fb.timeSpent != null ? String(fb.timeSpent) : "",
+    comment: fb.comment || "",
+    timestamp: fb.createdAt
+      ? new Date(fb.createdAt)
+      : fb.updatedAt
+        ? new Date(fb.updatedAt)
+        : new Date(),
+  })) ?? [];
 
 export default function RecipeFeedbackForm({
   recipeId,
   submitAction,
+  initialFeedbacks,
+  updateAction,
+  deleteAction,
 }: RecipeFeedbackFormProps) {
   const [rating, setRating] = useState<string>("");
   const [easiness, setEasiness] = useState<string>("");
@@ -40,7 +74,10 @@ export default function RecipeFeedbackForm({
   const [timeSpent, setTimeSpent] = useState<string>("");
   const [comment, setComment] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [feedbackEntries, setFeedbackEntries] = useState<FeedbackEntry[]>([]);
+  const [feedbackEntries, setFeedbackEntries] = useState<FeedbackEntry[]>(() =>
+    mapInitialFeedbacks(initialFeedbacks),
+  );
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -63,10 +100,36 @@ export default function RecipeFeedbackForm({
         timestamp: new Date(),
       };
 
-      setFeedbackEntries([newEntry, ...feedbackEntries]);
+      if (editingId) {
+        setFeedbackEntries((prev) =>
+          prev.map((entry) =>
+            entry.id === editingId
+              ? {
+                  ...entry,
+                  rating: newEntry.rating,
+                  easiness: newEntry.easiness,
+                  flavor: newEntry.flavor,
+                  timeSpent: newEntry.timeSpent,
+                  comment: newEntry.comment,
+                  timestamp: new Date(),
+                }
+              : entry,
+          ),
+        );
+      } else {
+        setFeedbackEntries([newEntry, ...feedbackEntries]);
+      }
 
       // Optionally send to backend if action is provided
-      if (submitAction) {
+      if (editingId && updateAction) {
+        const formData = new FormData();
+        formData.append("feedbackId", editingId);
+        formData.append("rating", rating);
+        formData.append("easiness", easiness);
+        formData.append("flavor", flavor);
+        formData.append("comment", comment);
+        await updateAction(formData);
+      } else if (submitAction) {
         const formData = new FormData();
         formData.append("recipeId", recipeId);
         formData.append("rating", rating);
@@ -82,6 +145,7 @@ export default function RecipeFeedbackForm({
       setFlavor("");
       setTimeSpent("");
       setComment("");
+      setEditingId(null);
     } catch (error) {
       toast.error("Failed to save feedback");
       console.error(error);
@@ -90,9 +154,40 @@ export default function RecipeFeedbackForm({
     }
   };
 
+  const startEdit = (entry: FeedbackEntry) => {
+    setEditingId(entry.id);
+    setRating(String(entry.rating));
+    setEasiness(String(entry.easiness));
+    setFlavor(String(entry.flavor));
+    setTimeSpent(entry.timeSpent || "");
+    setComment(entry.comment || "");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const cancelEdit = () => {
+    setEditingId(null);
+    setRating("");
+    setEasiness("");
+    setFlavor("");
+    setTimeSpent("");
+    setComment("");
+  };
+
   const removeFeedbackEntry = (id: string) => {
-    setFeedbackEntries(feedbackEntries.filter((entry) => entry.id !== id));
-    toast.success("Feedback entry removed");
+    (async () => {
+      try {
+        if (deleteAction) {
+          const fd = new FormData();
+          fd.append("feedbackId", id);
+          await deleteAction(fd);
+        }
+        setFeedbackEntries((prev) => prev.filter((entry) => entry.id !== id));
+        toast.success("Feedback entry removed");
+      } catch (err) {
+        console.error(err);
+        toast.error("Failed to remove feedback");
+      }
+    })();
   };
 
   return (
@@ -182,8 +277,23 @@ export default function RecipeFeedbackForm({
         </div>
 
         <Button type="submit" disabled={isSubmitting} className="w-full">
-          {isSubmitting ? "Saving..." : "Save Feedback"}
+          {isSubmitting
+            ? "Saving..."
+            : editingId
+              ? "Update Feedback"
+              : "Save Feedback"}
         </Button>
+        {editingId && (
+          <div className="flex justify-end">
+            <button
+              type="button"
+              onClick={cancelEdit}
+              className="text-sm text-muted-foreground hover:underline"
+            >
+              Cancel
+            </button>
+          </div>
+        )}
       </form>
 
       {feedbackEntries.length > 0 && (
@@ -212,13 +322,22 @@ export default function RecipeFeedbackForm({
                       ⏱ {entry.timeSpent}
                     </span>
                   </div>
-                  <button
-                    onClick={() => removeFeedbackEntry(entry.id)}
-                    className="text-muted-foreground hover:text-destructive transition-colors"
-                    title="Remove feedback entry"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => startEdit(entry)}
+                      className="text-foreground hover:underline text-sm"
+                      title="Edit feedback entry"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => removeFeedbackEntry(entry.id)}
+                      className="text-muted-foreground hover:text-destructive transition-colors"
+                      title="Remove feedback entry"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
                 {entry.comment && (
                   <p className="text-sm text-muted-foreground italic">

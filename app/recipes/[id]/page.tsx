@@ -176,6 +176,40 @@ async function submitRecipeFeedback(formData: FormData) {
   });
 }
 
+async function updateRecipeFeedback(formData: FormData) {
+  "use server";
+  const user = await currentUser();
+  if (!user) throw new Error("You must be signed in to update feedback.");
+
+  const feedbackId = formData.get("feedbackId")?.toString();
+  const rating = parseInt(formData.get("rating")?.toString() || "0");
+  const easiness = parseInt(formData.get("easiness")?.toString() || "0");
+  const flavor = parseInt(formData.get("flavor")?.toString() || "0");
+  const comment = formData.get("comment")?.toString() || null;
+
+  if (!feedbackId || !rating || !easiness || !flavor) {
+    throw new Error("Missing required feedback fields.");
+  }
+
+  await prisma.recipeFeedback.updateMany({
+    where: { id: feedbackId, clerkId: user.id },
+    data: { rating, easiness, flavor, comment },
+  });
+}
+
+async function deleteRecipeFeedback(formData: FormData) {
+  "use server";
+  const user = await currentUser();
+  if (!user) throw new Error("You must be signed in to delete feedback.");
+
+  const feedbackId = formData.get("feedbackId")?.toString();
+  if (!feedbackId) throw new Error("Missing feedback id.");
+
+  await prisma.recipeFeedback.deleteMany({
+    where: { id: feedbackId, clerkId: user.id },
+  });
+}
+
 async function updateRecipe(formData: FormData) {
   "use server";
   const user = await currentUser();
@@ -248,6 +282,22 @@ export default async function RecipeDetailPage({
     orderBy: { name: "asc" },
   });
 
+  const feedbacks = await prisma.recipeFeedback.findMany({
+    where: { recipeId: id, clerkId: user.id },
+    orderBy: { createdAt: "desc" },
+  });
+
+  const mappedFeedbacks = feedbacks.map((fb) => ({
+    id: fb.id,
+    rating: fb.rating,
+    easiness: fb.easiness ?? 0,
+    flavor: fb.flavor ?? 0,
+    timeSpent: fb.timeSpent ?? null,
+    comment: fb.comment ?? null,
+    createdAt: fb.createdAt,
+    updatedAt: fb.updatedAt,
+  }));
+
   return (
     <main className="space-y-6">
       <div className="flex items-start justify-between gap-4">
@@ -313,7 +363,13 @@ export default async function RecipeDetailPage({
           removeAction={removeIngredientFromRecipe}
           updateAction={updateIngredientQuantity}
         />
-        <RecipeFeedbackForm recipeId={id} submitAction={submitRecipeFeedback} />
+        <RecipeFeedbackForm
+          recipeId={id}
+          submitAction={submitRecipeFeedback}
+          initialFeedbacks={mappedFeedbacks}
+          updateAction={updateRecipeFeedback}
+          deleteAction={deleteRecipeFeedback}
+        />
       </div>
 
       {recipe.dailyMenus.length > 0 && (
