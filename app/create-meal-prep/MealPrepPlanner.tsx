@@ -15,6 +15,7 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
+import { toast } from "sonner";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -46,6 +47,7 @@ type MealPrepPlannerProps = {
   weekStartLabel: string;
   weekEndLabel: string;
   weeklyMenuId: string;
+  previousWeeklyMenuRecipeIds?: string[];
 };
 
 function buildIngredientGroups(recipes: RecipeItem[]) {
@@ -123,12 +125,16 @@ function RecipeSelect({
   value,
   onChange,
   recipes,
+  previousWeeklyMenuRecipeIds,
 }: {
   id?: string;
   value: string;
   onChange: (value: string) => void;
   recipes: RecipeItem[];
+  previousWeeklyMenuRecipeIds?: string[];
 }) {
+  const previousRecipeIds = new Set(previousWeeklyMenuRecipeIds);
+
   return (
     <Select value={value} onValueChange={(v) => onChange(v)}>
       <SelectTrigger id={id} className="w-full">
@@ -136,11 +142,25 @@ function RecipeSelect({
       </SelectTrigger>
       <SelectContent>
         <SelectItem value="empty">Choose recipe...</SelectItem>
-        {recipes.map((recipe) => (
-          <SelectItem key={recipe.id} value={recipe.id}>
-            {recipe.title} <RecipeTypeBadge type={recipe.type} />
-          </SelectItem>
-        ))}
+        {recipes.map((recipe) => {
+          const isPreviousWeek = previousRecipeIds.has(recipe.id);
+          return (
+            <SelectItem key={recipe.id} value={recipe.id}>
+              <span className="flex flex-wrap items-center gap-2">
+                <span>{recipe.title}</span>
+                <RecipeTypeBadge type={recipe.type} />
+                {isPreviousWeek && (
+                  <Badge
+                    variant="secondary"
+                    className="bg-slate-100 text-slate-800"
+                  >
+                    Previous week
+                  </Badge>
+                )}
+              </span>
+            </SelectItem>
+          );
+        })}
       </SelectContent>
     </Select>
   );
@@ -152,6 +172,7 @@ export default function MealPrepPlanner({
   weekStartLabel,
   weekEndLabel,
   weeklyMenuId,
+  previousWeeklyMenuRecipeIds,
 }: MealPrepPlannerProps) {
   const [assignments, setAssignments] = useState<Record<string, string>>(() =>
     Object.fromEntries(slots.map((slot) => [slot.id, slot.recipeId ?? ""])),
@@ -164,10 +185,29 @@ export default function MealPrepPlanner({
   const filledCount = Object.values(assignments).filter(Boolean).length;
 
   function handleChange(slotId: string, recipeId: string) {
-    setAssignments((current) => ({
-      ...current,
-      [slotId]: recipeId,
-    }));
+    setAssignments((current) => {
+      const normalizedRecipeId = recipeId === "empty" ? "" : recipeId;
+
+      if (normalizedRecipeId) {
+        const duplicate = Object.entries(current).find(
+          ([otherSlotId, otherRecipeId]) =>
+            otherSlotId !== slotId && otherRecipeId === normalizedRecipeId,
+        );
+
+        if (duplicate) {
+          toast.error(
+            "That recipe is already selected on another day this week.",
+          );
+          return current;
+        }
+      }
+
+      return {
+        ...current,
+        [slotId]: normalizedRecipeId,
+      };
+    });
+
     setError(null);
     setSuccess(null);
   }
@@ -293,6 +333,7 @@ export default function MealPrepPlanner({
                       handleChange(slot.id, recipeId)
                     }
                     recipes={recipes}
+                    previousWeeklyMenuRecipeIds={previousWeeklyMenuRecipeIds}
                   />
                   {assignments[slot.id] ? (
                     <p className="text-sm text-muted-foreground">

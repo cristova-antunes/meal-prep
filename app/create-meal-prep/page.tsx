@@ -111,6 +111,12 @@ function getWeekStartForWeeklyMenu(weeklyMenu: {
   return getSundayForWeekYear(weeklyMenu.week, weeklyMenu.year);
 }
 
+function getPreviousWeek(week: number, year: number) {
+  const weekStart = getSundayForWeekYear(week, year);
+  const previousWeekStart = addDays(weekStart, -7);
+  return getWeekNumber(previousWeekStart);
+}
+
 function buildCandidateWeeks(
   start: Date,
   weeklyMenus: Array<{
@@ -241,6 +247,37 @@ export default async function MealPrepPage({
   const selectedCandidate =
     selectedMenuById ?? selectedCandidateFromQuery ?? nextAvailableCandidate;
 
+  const selectedWeek = selectedWeeklyMenuById
+    ? { week: selectedWeeklyMenuById.week, year: selectedWeeklyMenuById.year }
+    : { week: selectedCandidate.week, year: selectedCandidate.year };
+
+  const previousWeek = getPreviousWeek(selectedWeek.week, selectedWeek.year);
+
+  const previousWeeklyMenu = await prisma.weeklyMenu.findFirst({
+    where: {
+      week: previousWeek.week,
+      year: previousWeek.year,
+      clerkId: user.id,
+    },
+    include: {
+      recipes: {
+        include: {
+          recipes: true,
+        },
+      },
+    },
+  });
+
+  const previousWeeklyMenuRecipeIds = previousWeeklyMenu
+    ? Array.from(
+        new Set(
+          previousWeeklyMenu.recipes.flatMap((dailyMenu) =>
+            dailyMenu.recipes.map((recipe) => recipe.id),
+          ),
+        ),
+      )
+    : [];
+
   // Do not create a weekly menu just for viewing. Only read existing one.
   const weeklyMenu =
     selectedMenuById?.existing ??
@@ -346,6 +383,7 @@ export default async function MealPrepPage({
               ? weeklyMenu.id
               : `week:${selectedCandidate.week}:${selectedCandidate.year}`
           }
+          previousWeeklyMenuRecipeIds={previousWeeklyMenuRecipeIds}
         />
       </div>
     </main>
