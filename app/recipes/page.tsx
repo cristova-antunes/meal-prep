@@ -142,7 +142,7 @@ export default async function RecipesPage({
                       </Badge>
                     )}
                     {r._count.recipeFeedbacks > 0 && (
-                      <Badge variant="outline" className="ml-2">
+                      <Badge className="bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300 ml-2">
                         Feedback
                       </Badge>
                     )}
