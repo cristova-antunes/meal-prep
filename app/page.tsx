@@ -1,9 +1,25 @@
 import Link from "next/link";
+import { currentUser } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default async function Page() {
+  const user = await currentUser();
+
+  if (!user) {
+    return (
+      <div className="rounded-3xl border border-border bg-card p-10 text-center shadow-sm">
+        <h1 className="text-3xl font-semibold">
+          Sign in to view your meal prep weeks
+        </h1>
+        <p className="mt-4 text-sm text-muted-foreground">
+          Your meal prep weeks are stored per Clerk user.
+        </p>
+      </div>
+    );
+  }
+
   const weeks = await prisma.weeklyMenu.findMany({
     orderBy: { createdAt: "desc" },
     take: 3,

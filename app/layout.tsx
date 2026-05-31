@@ -45,7 +45,7 @@ export default function RootLayout({
       >
         <ClerkProvider>
           <header
-            className="py-4 h-16 container mx-auto"
+            className="py-4 h-16 container px-4 mx-auto"
             suppressHydrationWarning
           >
             <Show when="signed-out">
