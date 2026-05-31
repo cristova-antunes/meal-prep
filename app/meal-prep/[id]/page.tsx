@@ -76,10 +76,7 @@ export default async function MealPrepDetailPage({
           </p>
         </div>
         <div className="flex gap-2">
-          <Link
-            href="/meal-prep"
-            className={buttonVariants({ variant: "outline" })}
-          >
+          <Link href="/" className={buttonVariants({ variant: "outline" })}>
             <ArrowLeft className="mr-1" />
             Back
           </Link>
@@ -137,41 +134,59 @@ export default async function MealPrepDetailPage({
         <CardHeader>
           <CardTitle>Total ingredients used</CardTitle>
         </CardHeader>
-        <CardContent>
-          <ul className="text-sm space-y-1 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {Object.entries(
-              weeklyMenu.recipes.reduce<
+        <CardContent className="space-y-6">
+          {Object.entries(
+            weeklyMenu.recipes.reduce<
+              Record<
+                string,
                 Record<string, { quantity: number; recipeCount: number }>
-              >((acc, daily) => {
-                daily.recipes.forEach((recipe) => {
-                  recipe.recipeIngredients.forEach((ri) => {
-                    const name = ri.ingredient.name;
+              >
+            >((acc, daily) => {
+              daily.recipes.forEach((recipe) => {
+                recipe.recipeIngredients.forEach((ri) => {
+                  const type = ri.ingredient.type || "Other";
+                  const name = ri.ingredient.name;
 
-                    // Ensure we initialize
-                    if (!acc[name]) {
-                      acc[name] = { quantity: 0, recipeCount: 0 };
-                    }
+                  // Ensure we initialize the type group
+                  if (!acc[type]) {
+                    acc[type] = {};
+                  }
 
-                    // Force TypeScript to treat quantity as a number if it's dynamic
-                    acc[name].quantity += Number(ri.quantity || 0);
-                    acc[name].recipeCount += 1;
-                  });
+                  // Ensure we initialize the ingredient
+                  if (!acc[type][name]) {
+                    acc[type][name] = { quantity: 0, recipeCount: 0 };
+                  }
+
+                  // Force TypeScript to treat quantity as a number if it's dynamic
+                  acc[type][name].quantity += Number(ri.quantity || 0);
+                  acc[type][name].recipeCount += 1;
                 });
-                return acc;
-              }, {}),
-            )
-              // 1. Sort alphabetically by the ingredient name (the key)
-              .sort((a, b) => a[0].localeCompare(b[0]))
-              // 2. Map over the sorted array
-              .map(([ingredient, data]) => (
-                <li key={ingredient} className="flex flex-col gap-2">
-                  <span className="font-semibold">{ingredient}</span>
-                  <span className="text-muted-foreground">
-                    {data.quantity} from {data.recipeCount} recipes
-                  </span>
-                </li>
-              ))}
-          </ul>
+              });
+              return acc;
+            }, {}),
+          )
+            // Sort types alphabetically
+            .sort((a, b) => a[0].localeCompare(b[0]))
+            .map(([type, ingredients]) => (
+              <div key={type}>
+                <h3 className="font-semibold text-sm text-muted-foreground mb-3">
+                  {type}
+                </h3>
+                <ul className="text-sm space-y-2 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {Object.entries(ingredients)
+                    // Sort ingredients alphabetically within each type
+                    .sort((a, b) => a[0].localeCompare(b[0]))
+                    .map(([ingredient, data]) => (
+                      <li key={ingredient} className="flex flex-col gap-2">
+                        <span className="font-semibold">{ingredient}</span>
+                        <span className="text-muted-foreground text-xs">
+                          {data.quantity} from {data.recipeCount} recipes
+                        </span>
+                      </li>
+                    ))}
+                </ul>
+              </div>
+            ))}
         </CardContent>
       </Card>
 

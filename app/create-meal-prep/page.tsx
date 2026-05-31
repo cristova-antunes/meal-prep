@@ -178,7 +178,7 @@ export default async function MealPrepPage({
       recipeIngredients: {
         select: {
           ingredient: {
-            select: { id: true, name: true },
+            select: { id: true, name: true, type: true },
           },
         },
       },

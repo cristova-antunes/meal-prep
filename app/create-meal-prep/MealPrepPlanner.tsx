@@ -18,15 +18,18 @@ import {
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { RecipeType } from "../generated/prisma/enums";
+import { IngredientType, RecipeType } from "../generated/prisma/enums";
 import RecipeTypeBadge from "@/components/feature/RecipeTypeBadge";
+import IngredientBadge from "@/components/feature/IngredientBadge";
+import { Badge } from "@/components/ui/badge";
+import { ingredientType as ingredientTypeOptions } from "@/types/types";
 import { saveWeeklyMealPrep, resetWeeklyMealPrep } from "./actions";
 
 export type RecipeItem = {
   id: string;
   title: string;
   type: RecipeType;
-  ingredients: { id: string; name: string }[];
+  ingredients: { id: string; name: string; type: IngredientType | null }[];
 };
 
 export type PrepSlot = {
@@ -48,29 +51,71 @@ type MealPrepPlannerProps = {
 function buildIngredientGroups(recipes: RecipeItem[]) {
   const groups = new Map<
     string,
-    { id: string; name: string; recipes: RecipeItem[] }
+    {
+      id: string;
+      type: IngredientType | null;
+      label: string;
+      ingredients: {
+        id: string;
+        name: string;
+        type: IngredientType | null;
+        recipes: RecipeItem[];
+      }[];
+    }
   >();
 
   recipes.forEach((recipe) => {
     recipe.ingredients.forEach((ingredient) => {
-      const existing = groups.get(ingredient.id);
-      if (existing) {
-        if (!existing.recipes.some((item) => item.id === recipe.id)) {
-          existing.recipes.push(recipe);
+      const typeKey = ingredient.type ?? "uncategorized";
+      const typeLabel =
+        ingredientTypeOptions.find((option) => option.value === ingredient.type)
+          ?.label || "Uncategorized";
+
+      const typeGroup = groups.get(typeKey);
+
+      if (typeGroup) {
+        const ingredientEntry = typeGroup.ingredients.find(
+          (item) => item.id === ingredient.id,
+        );
+
+        if (ingredientEntry) {
+          if (!ingredientEntry.recipes.some((item) => item.id === recipe.id)) {
+            ingredientEntry.recipes.push(recipe);
+          }
+        } else {
+          typeGroup.ingredients.push({
+            id: ingredient.id,
+            name: ingredient.name,
+            type: ingredient.type,
+            recipes: [recipe],
+          });
         }
       } else {
-        groups.set(ingredient.id, {
-          id: ingredient.id,
-          name: ingredient.name,
-          recipes: [recipe],
+        groups.set(typeKey, {
+          id: typeKey,
+          type: ingredient.type,
+          label: typeLabel,
+          ingredients: [
+            {
+              id: ingredient.id,
+              name: ingredient.name,
+              type: ingredient.type,
+              recipes: [recipe],
+            },
+          ],
         });
       }
     });
   });
 
-  return Array.from(groups.values()).sort((a, b) =>
-    a.name.localeCompare(b.name),
-  );
+  return Array.from(groups.values())
+    .map((group) => ({
+      ...group,
+      ingredients: group.ingredients.sort((a, b) =>
+        a.name.localeCompare(b.name),
+      ),
+    }))
+    .sort((a, b) => a.label.localeCompare(b.label));
 }
 
 function RecipeSelect({
@@ -139,7 +184,7 @@ export default function MealPrepPlanner({
       );
       await saveWeeklyMealPrep(weeklyMenuId, assignments, slotDates);
       setSuccess("Meal prep plan saved successfully!");
-      router.refresh();
+      router.push(`/meal-prep/${weeklyMenuId}`);
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "Failed to save meal prep plan",
@@ -177,7 +222,11 @@ export default function MealPrepPlanner({
       ? recipes.filter((recipe) => selectedRecipeIds.has(recipe.id))
       : [];
 
-  const ingredientGroups = buildIngredientGroups(ingredientSourceRecipes);
+  const ingredientTypeGroups = buildIngredientGroups(ingredientSourceRecipes);
+  const ingredientCount = ingredientTypeGroups.reduce(
+    (count, group) => count + group.ingredients.length,
+    0,
+  );
   const ingredientSourceLabel =
     selectedRecipeIds.size > 0
       ? "Selected recipes"
@@ -290,35 +339,77 @@ export default function MealPrepPlanner({
             <h2 className="mt-3 text-xl font-semibold">
               Ingredient shopping list
             </h2>
-            <p className="mt-2 mb-4 text-sm text-muted-foreground">
-              Each accordion section shows the recipes that use that ingredient.
+            {ingredientTypeGroups.length > 0 && (
+              <p className="mt-2 mb-6 text-sm">
+                {ingredientCount} ingredients across{" "}
+                {ingredientTypeGroups.length} categories
+              </p>
+            )}
+            <p className="mt-2 mb-2 text-sm text-muted-foreground">
+              Ingredients are grouped by type. Expand an ingredient to view the
+              recipes that use it.
             </p>
-            {ingredientGroups.length === 0 ? (
+
+            {ingredientTypeGroups.length === 0 ? (
               <p>
                 No ingredient groups are available yet. Assign a recipe to a
                 slot to build the list.
               </p>
             ) : (
-              <Accordion type="single" collapsible>
-                {ingredientGroups.map((group) => (
-                  <AccordionItem key={group.id} value={group.id}>
-                    <AccordionTrigger className="text-base">
-                      <span>{group.name}</span>
-                      <span className="text-muted-foreground ml-1">
-                        {group.recipes.length} recipe
-                        {group.recipes.length > 1 ? "s" : ""}
+              <div className="space-y-4">
+                {ingredientTypeGroups.map((group) => (
+                  <div
+                    key={group.id}
+                    className="space-y-3 rounded-3xl border border-border bg-muted/50 p-4"
+                  >
+                    <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                      <div className="flex flex-wrap items-center gap-2">
+                        {group.type ? (
+                          <IngredientBadge type={group.type} />
+                        ) : (
+                          <Badge
+                            variant="secondary"
+                            className="bg-slate-100 text-slate-800"
+                          >
+                            Uncategorized
+                          </Badge>
+                        )}
+                        <span className="text-sm font-medium">
+                          {group.label}
+                        </span>
+                      </div>
+                      <span className="text-sm text-muted-foreground">
+                        {group.ingredients.length} ingredient
+                        {group.ingredients.length > 1 ? "s" : ""}
                       </span>
-                    </AccordionTrigger>
-                    <AccordionContent>
-                      <ol className="space-y-2 list-inside list-decimal">
-                        {group.recipes.map((recipe) => (
-                          <li key={recipe.id}>{recipe.title}</li>
-                        ))}
-                      </ol>
-                    </AccordionContent>
-                  </AccordionItem>
+                    </div>
+
+                    <Accordion type="single" collapsible>
+                      {group.ingredients.map((ingredient) => (
+                        <AccordionItem
+                          key={ingredient.id}
+                          value={ingredient.id}
+                        >
+                          <AccordionTrigger className="text-base">
+                            <span>{ingredient.name}</span>
+                            <span className="text-muted-foreground ml-1">
+                              {ingredient.recipes.length} recipe
+                              {ingredient.recipes.length > 1 ? "s" : ""}
+                            </span>
+                          </AccordionTrigger>
+                          <AccordionContent>
+                            <ol className="space-y-2 list-inside list-decimal">
+                              {ingredient.recipes.map((recipe) => (
+                                <li key={recipe.id}>{recipe.title}</li>
+                              ))}
+                            </ol>
+                          </AccordionContent>
+                        </AccordionItem>
+                      ))}
+                    </Accordion>
+                  </div>
                 ))}
-              </Accordion>
+              </div>
             )}
           </CardContent>
         </Card>
