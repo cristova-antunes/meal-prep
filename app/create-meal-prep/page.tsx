@@ -2,7 +2,6 @@ import { currentUser } from "@clerk/nextjs/server";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import MealPrepPlanner, { PrepSlot } from "./MealPrepPlanner";
-import { getOrCreateWeeklyMenu } from "./actions";
 import WeekPicker from "./WeekPicker";
 
 const dayNames = [
@@ -242,15 +241,24 @@ export default async function MealPrepPage({
   const selectedCandidate =
     selectedMenuById ?? selectedCandidateFromQuery ?? nextAvailableCandidate;
 
+  // Do not create a weekly menu just for viewing. Only read existing one.
   const weeklyMenu =
     selectedMenuById?.existing ??
     selectedWeeklyMenuById ??
-    (await getOrCreateWeeklyMenu(
-      selectedCandidate.week,
-      selectedCandidate.year,
-      selectedCandidate.weekStart,
-      selectedCandidate.weekEnd,
-    ));
+    (await prisma.weeklyMenu.findFirst({
+      where: {
+        week: selectedCandidate.week,
+        year: selectedCandidate.year,
+        clerkId: user.id,
+      },
+      include: {
+        recipes: {
+          include: {
+            recipes: true,
+          },
+        },
+      },
+    }));
 
   const selectedValue = selectedWeekId
     ? `id:${selectedWeekId}`
@@ -315,13 +323,13 @@ export default async function MealPrepPage({
 
   const prepSlots = buildPrepSlots(
     selectedWeeklyMenuById
-      ? getWeekStartForWeeklyMenu(weeklyMenu)
+      ? getWeekStartForWeeklyMenu(selectedWeeklyMenuById)
       : selectedCandidate.weekStart,
-    weeklyMenu.recipes,
+    weeklyMenu?.recipes ?? [],
   );
 
   const [weekStartLabel, weekEndLabel] = selectedWeeklyMenuById
-    ? weeklyMenu.label.split(" to ")
+    ? selectedWeeklyMenuById.label.split(" to ")
     : selectedCandidate.label.split(" to ");
 
   return (
@@ -333,7 +341,11 @@ export default async function MealPrepPage({
           recipes={recipeItems}
           weekStartLabel={weekStartLabel}
           weekEndLabel={weekEndLabel}
-          weeklyMenuId={weeklyMenu.id}
+          weeklyMenuId={
+            weeklyMenu
+              ? weeklyMenu.id
+              : `week:${selectedCandidate.week}:${selectedCandidate.year}`
+          }
         />
       </div>
     </main>

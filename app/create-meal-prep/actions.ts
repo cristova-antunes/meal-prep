@@ -16,13 +16,47 @@ function formatWeeklyMenuLabel(start: Date, end: Date) {
 }
 
 export async function saveWeeklyMealPrep(
-  weeklyMenuId: string,
+  weeklyMenuIdOrKey: string,
   assignments: MealPrepAssignments,
   slotDates: Record<string, Date>,
 ) {
   const user = await currentUser();
   if (!user) {
     throw new Error("Not authenticated");
+  }
+
+  // weeklyMenuIdOrKey can be either an existing id, or a key like `week:42:2026`
+  let weeklyMenuId = weeklyMenuIdOrKey;
+
+  const weekKeyMatch = /^week:(\d+):(\d+)$/.exec(weeklyMenuIdOrKey);
+
+  // If caller passed a week:key (meaning the week hasn't been created yet),
+  // create the weekly menu now before proceeding to save assignments.
+  if (weekKeyMatch) {
+    const week = Number(weekKeyMatch[1]);
+    const year = Number(weekKeyMatch[2]);
+
+    const dates = Object.values(slotDates)
+      .map((value) => new Date(value))
+      .filter((date) => !Number.isNaN(date.getTime()));
+
+    if (dates.length === 0) {
+      throw new Error("Unable to determine week dates for label");
+    }
+
+    dates.sort((a, b) => a.getTime() - b.getTime());
+    const label = formatWeeklyMenuLabel(dates[0], dates[dates.length - 1]);
+
+    const created = await prisma.weeklyMenu.create({
+      data: {
+        week,
+        year,
+        clerkId: user.id,
+        label,
+      },
+    });
+
+    weeklyMenuId = created.id;
   }
 
   // Get the existing weekly menu to verify ownership
