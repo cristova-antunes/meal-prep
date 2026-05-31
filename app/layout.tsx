@@ -62,7 +62,7 @@ export default function RootLayout({
               <MenuNavigation />
             </Show>
           </header>
-          <div className="container my-12 mx-auto">{children}</div>
+          <div className="container my-12 mx-auto px-4">{children}</div>
           <Toaster />
         </ClerkProvider>
       </body>
