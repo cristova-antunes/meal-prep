@@ -93,6 +93,9 @@ export default async function RecipesPage({
       thumbnailURL: true,
       description: true,
       isFavorite: true,
+      _count: {
+        select: { recipeFeedbacks: true },
+      },
     },
   });
 
@@ -136,6 +139,11 @@ export default async function RecipesPage({
                     {r.isCustom && (
                       <Badge variant="outline" className="ml-2">
                         Custom
+                      </Badge>
+                    )}
+                    {r._count.recipeFeedbacks > 0 && (
+                      <Badge variant="outline" className="ml-2">
+                        Feedback
                       </Badge>
                     )}
                     {r.isFavorite && (
