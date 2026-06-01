@@ -17,6 +17,9 @@ dependencies:
   '@prisma/client':
     specifier: ^7.8.0
     version: 7.8.0(prisma@7.8.0)(typescript@5.9.3)
+  '@prisma/extension-accelerate':
+    specifier: ^3.0.1
+    version: 3.0.1(@prisma/client@7.8.0)
   '@vercel/blob':
     specifier: ^2.3.3
     version: 2.3.3
@@ -1537,6 +1540,15 @@ packages:
       '@prisma/engines-version': 7.8.0-6.3c6e192761c0362d496ed980de936e2f3cebcd3a
       '@prisma/fetch-engine': 7.8.0
       '@prisma/get-platform': 7.8.0
+
+  /@prisma/extension-accelerate@3.0.1(@prisma/client@7.8.0):
+    resolution: {integrity: sha512-xc+kn4AjjTzS9jsdD1JWCebB09y0Aj+C8GjjG7oUm81PF9psvmJOw5rxpl7tOEBz/8hmuNX996XL28ys/OLxVA==}
+    engines: {node: '>=22'}
+    peerDependencies:
+      '@prisma/client': '>=4.16.1'
+    dependencies:
+      '@prisma/client': 7.8.0(prisma@7.8.0)(typescript@5.9.3)
+    dev: false
 
   /@prisma/fetch-engine@7.8.0:
     resolution: {integrity: sha512-gwB0Euiz/DDRyxFRpLXYlK3RfaZUj1c5dAYMuhZYfApg7arknJlcb9bIsOHDppJmbqYaVA+yBIiFMDBfprsNPQ==}

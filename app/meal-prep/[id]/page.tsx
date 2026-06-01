@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft } from "lucide-react";
+import { WeeklyMenuWithRecipesAndIngredients } from "@/types/prisma";
 
 export default async function MealPrepDetailPage({
   params,
@@ -19,8 +20,9 @@ export default async function MealPrepDetailPage({
 }) {
   const { id } = await params;
 
-  const weeklyMenu = await prisma.weeklyMenu.findUnique({
+  const weeklyMenu = (await prisma.weeklyMenu.findUnique({
     where: { id },
+    cacheStrategy: { ttl: 60, swr: 10 },
     include: {
       recipes: {
         orderBy: { date: "asc" },
@@ -37,7 +39,7 @@ export default async function MealPrepDetailPage({
         },
       },
     },
-  });
+  })) as WeeklyMenuWithRecipesAndIngredients;
 
   if (!weeklyMenu) {
     notFound();

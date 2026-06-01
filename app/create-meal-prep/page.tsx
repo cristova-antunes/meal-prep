@@ -3,6 +3,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import MealPrepPlanner, { PrepSlot } from "./MealPrepPlanner";
 import WeekPicker from "./WeekPicker";
+import { RecipesWithIngredients } from "@/types/prisma";
 
 const dayNames = [
   "Sunday",
@@ -173,9 +174,10 @@ export default async function MealPrepPage({
     );
   }
 
-  const recipes = await prisma.recipe.findMany({
+  const recipes = (await prisma.recipe.findMany({
     where: { clerkId: user.id },
     orderBy: { title: "asc" },
+    cacheStrategy: { ttl: 60, swr: 10 },
     select: {
       id: true,
       title: true,
@@ -188,7 +190,7 @@ export default async function MealPrepPage({
         },
       },
     },
-  });
+  })) as unknown as RecipesWithIngredients;
 
   const recipeItems = recipes.map((recipe) => ({
     id: recipe.id,
@@ -200,6 +202,7 @@ export default async function MealPrepPage({
   const sunday = getUpcomingSunday(new Date());
   const weeklyMenus = await prisma.weeklyMenu.findMany({
     where: { clerkId: user.id },
+    cacheStrategy: { ttl: 60, swr: 10 },
     include: {
       recipes: {
         include: {
@@ -223,6 +226,7 @@ export default async function MealPrepPage({
     selectedWeekId && !selectedMenuById
       ? await prisma.weeklyMenu.findUnique({
           where: { id: selectedWeekId },
+          cacheStrategy: { ttl: 60, swr: 10 },
           include: {
             recipes: {
               include: {
@@ -259,6 +263,7 @@ export default async function MealPrepPage({
       year: previousWeek.year,
       clerkId: user.id,
     },
+    cacheStrategy: { ttl: 60, swr: 10 },
     include: {
       recipes: {
         include: {
@@ -288,6 +293,7 @@ export default async function MealPrepPage({
         year: selectedCandidate.year,
         clerkId: user.id,
       },
+      cacheStrategy: { ttl: 60, swr: 10 },
       include: {
         recipes: {
           include: {

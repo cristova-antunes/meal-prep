@@ -62,6 +62,7 @@ export async function saveWeeklyMealPrep(
   // Get the existing weekly menu to verify ownership
   const weeklyMenu = await prisma.weeklyMenu.findUnique({
     where: { id: weeklyMenuId },
+    cacheStrategy: { ttl: 60, swr: 10 },
   });
 
   if (!weeklyMenu || weeklyMenu.clerkId !== user.id) {
@@ -91,6 +92,7 @@ export async function saveWeeklyMealPrep(
         some: { id: weeklyMenuId },
       },
     },
+    cacheStrategy: { ttl: 60, swr: 10 },
     select: { id: true },
   });
 
@@ -138,6 +140,7 @@ export async function resetWeeklyMealPrep(weeklyMenuId: string) {
   const weeklyMenu = await prisma.weeklyMenu.findUnique({
     where: { id: weeklyMenuId },
     include: { recipes: { select: { id: true } } },
+    cacheStrategy: { ttl: 60, swr: 10 },
   });
 
   if (!weeklyMenu || weeklyMenu.clerkId !== user.id) {
@@ -172,6 +175,7 @@ export async function getOrCreateWeeklyMenu(
       year,
       clerkId: user.id,
     },
+    cacheStrategy: { ttl: 60, swr: 10 },
     include: {
       recipes: {
         include: {

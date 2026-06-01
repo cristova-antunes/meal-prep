@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/card";
 import { ArrowLeft } from "lucide-react";
 import IngredientBadge from "@/components/feature/IngredientBadge";
+import { IngredientWithTheirRecipes } from "@/types/prisma";
 
 export default async function IngredientDetailPage({
   params,
@@ -36,11 +37,12 @@ export default async function IngredientDetailPage({
     );
   }
 
-  const ingredient = await prisma.ingredient.findFirst({
+  const ingredient = (await prisma.ingredient.findFirst({
     where: {
       id: resolvedParams.id,
       clerkId: user.id,
     },
+    cacheStrategy: { ttl: 60, swr: 10 },
     select: {
       id: true,
       name: true,
@@ -59,7 +61,7 @@ export default async function IngredientDetailPage({
         },
       },
     },
-  });
+  })) as IngredientWithTheirRecipes | null;
 
   if (!ingredient) {
     notFound();

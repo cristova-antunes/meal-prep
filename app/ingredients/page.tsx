@@ -51,6 +51,7 @@ export default async function IngredientsPage({
   const ingredients = await prisma.ingredient.findMany({
     where,
     orderBy: { name: "asc" },
+    cacheStrategy: { ttl: 60, swr: 10 },
     select: {
       id: true,
       name: true,

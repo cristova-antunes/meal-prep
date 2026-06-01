@@ -3,6 +3,7 @@ import { currentUser } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { WeeklyMenuWithRecipes } from "@/types/prisma";
 
 export default async function Page() {
   const user = await currentUser();
@@ -20,9 +21,10 @@ export default async function Page() {
     );
   }
 
-  const weeks = await prisma.weeklyMenu.findMany({
+  const weeks = (await prisma.weeklyMenu.findMany({
     orderBy: { createdAt: "desc" },
     take: 3,
+    cacheStrategy: { ttl: 60, swr: 10 },
     include: {
       recipes: {
         include: {
@@ -30,7 +32,7 @@ export default async function Page() {
         },
       },
     },
-  });
+  })) as WeeklyMenuWithRecipes;
 
   return (
     <div className="space-y-6">

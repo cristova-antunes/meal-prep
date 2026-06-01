@@ -1,7 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import type { Ingredient, Recipe } from "@/app/generated/prisma/client";
 import { currentUser } from "@clerk/nextjs/server";
-import { getRecipeHealthStatus } from "@/lib/recipe-health";
 import RecipeManager from "./RecipeManager";
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
@@ -144,6 +143,7 @@ async function createRecipe(formData: FormData) {
       },
       clerkId: user.id,
     },
+    cacheStrategy: { ttl: 60, swr: 10 },
   });
 
   const ingredientNameToId: Record<string, string> = {};
@@ -166,11 +166,6 @@ async function createRecipe(formData: FormData) {
         quantity: row.quantity,
         clerkId: `${user.id}-${recipe.id}-${row.ingredientId}`,
       })),
-    });
-
-    const recipeIngredientRows = await prisma.recipeIngredient.findMany({
-      where: { recipeId: recipe.id },
-      include: { ingredient: true },
     });
 
     await prisma.recipe.updateMany({
@@ -204,6 +199,7 @@ export default async function RecipePage() {
     where: {
       clerkId: user.id,
     },
+    cacheStrategy: { ttl: 60, swr: 10 },
     orderBy: {
       name: "asc",
     },

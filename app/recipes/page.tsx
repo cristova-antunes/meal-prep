@@ -14,6 +14,7 @@ import RecipeTypeBadge from "@/components/feature/RecipeTypeBadge";
 import { Badge } from "@/components/ui/badge";
 import RecipeFilters from "./RecipeFilters";
 import { Heart } from "lucide-react";
+import { RecipesWithCount } from "@/types/prisma";
 
 export default async function RecipesPage({
   searchParams,
@@ -81,9 +82,10 @@ export default async function RecipesPage({
     where.NOT = { dailyMenus: { some: { weeklyMenus: { some: {} } } } };
   }
 
-  const recipes = await prisma.recipe.findMany({
+  const recipes = (await prisma.recipe.findMany({
     where,
     orderBy: { title: "asc" },
+    cacheStrategy: { ttl: 60, swr: 10 },
     select: {
       id: true,
       title: true,
@@ -97,7 +99,7 @@ export default async function RecipesPage({
         select: { recipeFeedbacks: true },
       },
     },
-  });
+  })) as unknown as RecipesWithCount;
 
   return (
     <main>

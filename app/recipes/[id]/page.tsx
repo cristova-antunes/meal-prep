@@ -29,6 +29,7 @@ async function addIngredientToRecipe(formData: FormData) {
   if (!recipeId || !ingredientName) throw new Error("Missing ids.");
   let ingredient = await prisma.ingredient.findFirst({
     where: { name: ingredientName, clerkId: user.id },
+    cacheStrategy: { ttl: 60, swr: 10 },
   });
 
   if (!ingredient) {
@@ -51,6 +52,7 @@ async function addIngredientToRecipe(formData: FormData) {
   const recipeIngredientRows = await prisma.recipeIngredient.findMany({
     where: { recipeId },
     include: { ingredient: true },
+    cacheStrategy: { ttl: 60, swr: 10 },
   });
 
   await prisma.recipe.updateMany({
@@ -75,6 +77,7 @@ async function removeIngredientFromRecipe(formData: FormData) {
 
   const ingredient = await prisma.ingredient.findFirst({
     where: { name: ingredientName, clerkId: user.id },
+    cacheStrategy: { ttl: 60, swr: 10 },
   });
 
   if (!ingredient) throw new Error("Ingredient not found.");
@@ -86,6 +89,7 @@ async function removeIngredientFromRecipe(formData: FormData) {
   const recipeIngredientRows = await prisma.recipeIngredient.findMany({
     where: { recipeId },
     include: { ingredient: true },
+    cacheStrategy: { ttl: 60, swr: 10 },
   });
 
   await prisma.recipe.updateMany({
@@ -123,6 +127,7 @@ async function updateIngredientQuantity(formData: FormData) {
 
   const ingredient = await prisma.ingredient.findFirst({
     where: { name: ingredientName, clerkId: user.id },
+    cacheStrategy: { ttl: 60, swr: 10 },
   });
 
   if (!ingredient) throw new Error("Ingredient not found.");
@@ -254,6 +259,7 @@ export default async function RecipeDetailPage({
 
   const recipe = await prisma.recipe.findUnique({
     where: { id },
+    cacheStrategy: { ttl: 60, swr: 10 },
     include: {
       recipeIngredients: { include: { ingredient: true } },
       dailyMenus: {
@@ -280,11 +286,13 @@ export default async function RecipeDetailPage({
   const userIngredients = await prisma.ingredient.findMany({
     where: { clerkId: user.id },
     orderBy: { name: "asc" },
+    cacheStrategy: { ttl: 60, swr: 10 },
   });
 
   const feedbacks = await prisma.recipeFeedback.findMany({
     where: { recipeId: id, clerkId: user.id },
     orderBy: { createdAt: "desc" },
+    cacheStrategy: { ttl: 60, swr: 10 },
   });
 
   const mappedFeedbacks = feedbacks.map((fb) => ({
