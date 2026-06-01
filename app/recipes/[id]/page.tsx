@@ -6,7 +6,7 @@ import {
   toPrismaRecipeHealthStatus,
 } from "@/lib/recipe-health";
 import { buttonVariants } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import DeleteRecipeForm from "../DeleteRecipeForm";
 import IngredientsEditor from "../IngredientsEditor";
 import RecipeFeedbackForm from "../RecipeFeedbackForm";
@@ -311,11 +311,6 @@ export default async function RecipeDetailPage({
       <div className="flex items-start justify-between gap-4">
         <div>
           <h1 className="text-3xl font-semibold">{recipe.title}</h1>
-          {recipe.description ? (
-            <p className="mt-2 text-sm text-muted-foreground">
-              {recipe.description}
-            </p>
-          ) : null}
 
           <div className="mt-2 flex gap-2 items-center">
             <RecipeTypeBadge type={recipe.type} />
@@ -359,6 +354,18 @@ export default async function RecipeDetailPage({
           <DeleteRecipeForm recipeId={id} deleteAction={deleteRecipe} />
         </div>
       </div>
+
+      {recipe.description ? (
+        <Card className="my-6">
+          <CardHeader>
+            <CardTitle>Notes</CardTitle>
+          </CardHeader>
+
+          <CardContent>
+            <p>{recipe.description}</p>
+          </CardContent>
+        </Card>
+      ) : null}
 
       <RecipeHealthAnalyzer recipeIngredients={recipe.recipeIngredients} />
 

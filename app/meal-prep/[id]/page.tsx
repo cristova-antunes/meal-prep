@@ -33,6 +33,11 @@ export default async function MealPrepDetailPage({
                 include: {
                   ingredient: true,
                 },
+                orderBy: {
+                  ingredient: {
+                    name: "asc",
+                  },
+                },
               },
             },
           },
@@ -46,13 +51,13 @@ export default async function MealPrepDetailPage({
   }
 
   const daysOfWeek = [
+    "Sunday",
     "Monday",
     "Tuesday",
     "Wednesday",
     "Thursday",
     "Friday",
     "Saturday",
-    "Sunday",
   ];
 
   // Group daily menus by day of week
@@ -97,7 +102,7 @@ export default async function MealPrepDetailPage({
           <CardTitle>Summary</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             <div>
               <p className="text-sm text-muted-foreground">
                 Total Days Planned
@@ -136,7 +141,7 @@ export default async function MealPrepDetailPage({
         <CardHeader>
           <CardTitle>Total ingredients used</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {Object.entries(
             weeklyMenu.recipes.reduce<
               Record<
@@ -174,13 +179,13 @@ export default async function MealPrepDetailPage({
                 <h3 className="font-semibold text-sm text-muted-foreground mb-3">
                   {type}
                 </h3>
-                <ul className="text-sm space-y-2 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <ul className="text-sm space-y-2 grid grid-cols-1 ">
                   {Object.entries(ingredients)
                     // Sort ingredients alphabetically within each type
                     .sort((a, b) => a[0].localeCompare(b[0]))
                     .map(([ingredient, data]) => (
-                      <li key={ingredient} className="flex flex-col gap-2">
-                        <span className="font-semibold">{ingredient}</span>
+                      <li key={ingredient} className="flex gap-2 items-center">
+                        <span>{ingredient}</span>
                         <span className="text-muted-foreground text-xs">
                           {data.quantity} from {data.recipeCount} recipes
                         </span>
@@ -193,7 +198,7 @@ export default async function MealPrepDetailPage({
       </Card>
 
       {/* Daily Menus Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {dailyMenusByDay.map(({ day, dailyMenu }) => (
           <Card key={day} className="flex flex-col">
             <CardHeader>

@@ -7,6 +7,7 @@ import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -161,11 +162,10 @@ export default async function RecipesPage({
                 </CardHeader>
                 <CardContent>
                   {r.description ? (
-                    <p className="text-sm text-muted-foreground">
-                      {r.description}
-                    </p>
+                    <p className="text-sm">{r.description}</p>
                   ) : null}
-
+                </CardContent>
+                <CardFooter className="justify-end">
                   {r.instagramURL ? (
                     <Link
                       href={r.instagramURL}
@@ -176,7 +176,15 @@ export default async function RecipesPage({
                       View on Instagram
                     </Link>
                   ) : null}
-                </CardContent>
+                  <Link
+                    href={`/recipes/${r.id}`}
+                    className={buttonVariants({
+                      variant: "link",
+                    })}
+                  >
+                    Open
+                  </Link>
+                </CardFooter>
               </Card>
             </li>
           ))}

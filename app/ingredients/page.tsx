@@ -5,12 +5,14 @@ import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
 import type { Prisma } from "@/app/generated/prisma/client";
 import IngredientsSearch from "./IngredientsSearch";
 import IngredientBadge from "@/components/feature/IngredientBadge";
+import { buttonVariants } from "@/components/ui/button";
 
 export default async function IngredientsPage({
   searchParams,
@@ -101,14 +103,17 @@ export default async function IngredientsPage({
                     </CardDescription>
                   )}
                 </CardHeader>
-                <CardContent>
+                <CardContent></CardContent>
+                <CardFooter className="justify-end">
                   <Link
                     href={`/ingredients/${ingredient.id}`}
-                    className="text-sm text-primary hover:underline"
+                    className={buttonVariants({
+                      variant: "link",
+                    })}
                   >
-                    View ingredient
+                    Open
                   </Link>
-                </CardContent>
+                </CardFooter>
               </Card>
             </li>
           ))}
