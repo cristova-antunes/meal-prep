@@ -14,6 +14,8 @@ import { ArrowLeft } from "lucide-react";
 import { WeeklyMenuWithRecipesAndIngredients } from "@/types/prisma";
 
 async function updateDailyMenuCooked(formData: FormData) {
+  "use server";
+
   const dailyMenuId = formData.get("dailyMenuId");
   const weeklyMenuId = formData.get("weeklyMenuId");
 
