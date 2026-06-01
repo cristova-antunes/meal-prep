@@ -108,7 +108,7 @@ export default async function IngredientsPage({
                   <Link
                     href={`/ingredients/${ingredient.id}`}
                     className={buttonVariants({
-                      variant: "link",
+                      variant: "secondary",
                     })}
                   >
                     Open

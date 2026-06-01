@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { buttonVariants } from "@/components/ui/button";
 import {
@@ -12,6 +12,26 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft } from "lucide-react";
 import { WeeklyMenuWithRecipesAndIngredients } from "@/types/prisma";
+
+async function updateDailyMenuCooked(formData: FormData) {
+  const dailyMenuId = formData.get("dailyMenuId");
+  const weeklyMenuId = formData.get("weeklyMenuId");
+
+  if (!dailyMenuId || typeof dailyMenuId !== "string") {
+    return;
+  }
+
+  const cooked = formData.has("cooked");
+
+  await prisma.dailyMenu.update({
+    where: { id: dailyMenuId },
+    data: { cooked },
+  });
+
+  if (weeklyMenuId && typeof weeklyMenuId === "string") {
+    redirect(`/meal-prep/${weeklyMenuId}`);
+  }
+}
 
 export default async function MealPrepDetailPage({
   params,
@@ -137,7 +157,104 @@ export default async function MealPrepDetailPage({
         </CardContent>
       </Card>
 
-      <Card className="mb-6">
+      {/* Daily Menus Grid */}
+      <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-6">
+        {dailyMenusByDay.map(({ day, dailyMenu }) => (
+          <Card key={day} className="flex flex-col">
+            <CardHeader>
+              <CardTitle className="text-lg">{day}</CardTitle>
+              {dailyMenu && (
+                <CardDescription>
+                  {new Date(dailyMenu.date).toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                  })}
+                </CardDescription>
+              )}
+            </CardHeader>
+            {dailyMenu && (
+              <form
+                action={updateDailyMenuCooked}
+                className="flex items-center justify-between gap-3 px-6 pb-4"
+              >
+                <input type="hidden" name="dailyMenuId" value={dailyMenu.id} />
+                <input
+                  type="hidden"
+                  name="weeklyMenuId"
+                  value={weeklyMenu.id}
+                />
+                <label className="flex items-center gap-2 text-sm">
+                  <input
+                    type="checkbox"
+                    name="cooked"
+                    defaultChecked={dailyMenu.cooked}
+                    className="h-4 w-4 rounded border-border text-primary focus:ring-primary"
+                  />
+                  <span>{dailyMenu.cooked ? "Cooked" : "Mark as cooked"}</span>
+                </label>
+                <button
+                  type="submit"
+                  className={buttonVariants({ variant: "outline", size: "sm" })}
+                >
+                  Save
+                </button>
+              </form>
+            )}
+            <CardContent className="flex-1">
+              {!dailyMenu || dailyMenu.recipes.length === 0 ? (
+                <p className="text-sm text-muted-foreground">
+                  No recipes planned
+                </p>
+              ) : (
+                <div className="space-y-4">
+                  {dailyMenu.recipes.map((recipe) => (
+                    <div
+                      key={recipe.id}
+                      className="border-l-2 border-primary pl-3"
+                    >
+                      <Link
+                        href={`/recipes/${recipe.id}`}
+                        className="font-semibold text-primary hover:underline"
+                      >
+                        {recipe.title}
+                      </Link>
+                      {recipe.type && (
+                        <div className="mt-2">
+                          <Badge variant="outline" className="capitalize">
+                            {recipe.type.toLowerCase()}
+                          </Badge>
+                        </div>
+                      )}
+                      {recipe.recipeIngredients.length > 0 && (
+                        <div className="mt-3">
+                          <p className="text-xs font-medium text-muted-foreground mb-2">
+                            Ingredients:
+                          </p>
+                          <ul className="text-xs space-y-1">
+                            {recipe.recipeIngredients.map((ri) => (
+                              <li
+                                key={ri.ingredientId}
+                                className="flex justify-between"
+                              >
+                                <span>{ri.ingredient.name}</span>
+                                <span className="text-muted-foreground">
+                                  {ri.quantity}
+                                </span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      <Card>
         <CardHeader>
           <CardTitle>Total ingredients used</CardTitle>
         </CardHeader>
@@ -196,75 +313,6 @@ export default async function MealPrepDetailPage({
             ))}
         </CardContent>
       </Card>
-
-      {/* Daily Menus Grid */}
-      <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {dailyMenusByDay.map(({ day, dailyMenu }) => (
-          <Card key={day} className="flex flex-col">
-            <CardHeader>
-              <CardTitle className="text-lg">{day}</CardTitle>
-              {dailyMenu && (
-                <CardDescription>
-                  {new Date(dailyMenu.date).toLocaleDateString("en-US", {
-                    month: "short",
-                    day: "numeric",
-                  })}
-                </CardDescription>
-              )}
-            </CardHeader>
-            <CardContent className="flex-1">
-              {!dailyMenu || dailyMenu.recipes.length === 0 ? (
-                <p className="text-sm text-muted-foreground">
-                  No recipes planned
-                </p>
-              ) : (
-                <div className="space-y-4">
-                  {dailyMenu.recipes.map((recipe) => (
-                    <div
-                      key={recipe.id}
-                      className="border-l-2 border-primary pl-3"
-                    >
-                      <Link
-                        href={`/recipes/${recipe.id}`}
-                        className="font-semibold text-primary hover:underline"
-                      >
-                        {recipe.title}
-                      </Link>
-                      {recipe.type && (
-                        <div className="mt-2">
-                          <Badge variant="outline" className="capitalize">
-                            {recipe.type.toLowerCase()}
-                          </Badge>
-                        </div>
-                      )}
-                      {recipe.recipeIngredients.length > 0 && (
-                        <div className="mt-3">
-                          <p className="text-xs font-medium text-muted-foreground mb-2">
-                            Ingredients:
-                          </p>
-                          <ul className="text-xs space-y-1">
-                            {recipe.recipeIngredients.map((ri) => (
-                              <li
-                                key={ri.ingredientId}
-                                className="flex justify-between"
-                              >
-                                <span>{ri.ingredient.name}</span>
-                                <span className="text-muted-foreground">
-                                  {ri.quantity}
-                                </span>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        ))}
-      </div>
     </div>
   );
 }
