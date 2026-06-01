@@ -23,6 +23,9 @@ export default async function Page() {
 
   const weeks = (await prisma.weeklyMenu.findMany({
     orderBy: { createdAt: "desc" },
+    where: {
+      clerkId: user.id,
+    },
     take: 3,
     cacheStrategy: { ttl: 60, swr: 10 },
     include: {

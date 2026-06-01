@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { buttonVariants } from "@/components/ui/button";
 import {
@@ -12,12 +12,13 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft } from "lucide-react";
 import { WeeklyMenuWithRecipesAndIngredients } from "@/types/prisma";
+import MealPrepCookedToggle from "../MealPrepCookedToggle";
+import { currentUser } from "@clerk/nextjs/server";
 
 async function updateDailyMenuCooked(formData: FormData) {
   "use server";
 
   const dailyMenuId = formData.get("dailyMenuId");
-  const weeklyMenuId = formData.get("weeklyMenuId");
 
   if (!dailyMenuId || typeof dailyMenuId !== "string") {
     return;
@@ -29,10 +30,6 @@ async function updateDailyMenuCooked(formData: FormData) {
     where: { id: dailyMenuId },
     data: { cooked },
   });
-
-  if (weeklyMenuId && typeof weeklyMenuId === "string") {
-    redirect(`/meal-prep/${weeklyMenuId}`);
-  }
 }
 
 export default async function MealPrepDetailPage({
@@ -42,8 +39,14 @@ export default async function MealPrepDetailPage({
 }) {
   const { id } = await params;
 
+  const user = await currentUser();
+
+  if (!user) {
+    notFound();
+  }
+
   const weeklyMenu = (await prisma.weeklyMenu.findUnique({
-    where: { id },
+    where: { id, clerkId: user.id },
     cacheStrategy: { ttl: 60, swr: 10 },
     include: {
       recipes: {
@@ -175,32 +178,13 @@ export default async function MealPrepDetailPage({
               )}
             </CardHeader>
             {dailyMenu && (
-              <form
-                action={updateDailyMenuCooked}
-                className="flex items-center justify-between gap-3 px-6 pb-4"
-              >
-                <input type="hidden" name="dailyMenuId" value={dailyMenu.id} />
-                <input
-                  type="hidden"
-                  name="weeklyMenuId"
-                  value={weeklyMenu.id}
+              <div className="px-6 pb-4">
+                <MealPrepCookedToggle
+                  dailyMenuId={dailyMenu.id}
+                  initialCooked={dailyMenu.cooked}
+                  toggleCooked={updateDailyMenuCooked}
                 />
-                <label className="flex items-center gap-2 text-sm">
-                  <input
-                    type="checkbox"
-                    name="cooked"
-                    defaultChecked={dailyMenu.cooked}
-                    className="h-4 w-4 rounded border-border text-primary focus:ring-primary"
-                  />
-                  <span>{dailyMenu.cooked ? "Cooked" : "Mark as cooked"}</span>
-                </label>
-                <button
-                  type="submit"
-                  className={buttonVariants({ variant: "outline", size: "sm" })}
-                >
-                  Save
-                </button>
-              </form>
+              </div>
             )}
             <CardContent className="flex-1">
               {!dailyMenu || dailyMenu.recipes.length === 0 ? (
