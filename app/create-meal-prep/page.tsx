@@ -262,6 +262,11 @@ export default async function MealPrepPage({
       week: previousWeek.week,
       year: previousWeek.year,
       clerkId: user.id,
+      recipes: {
+        some: {
+          cooked: true,
+        },
+      },
     },
     cacheStrategy: { ttl: 60, swr: 10 },
     include: {

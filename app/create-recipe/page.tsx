@@ -166,6 +166,7 @@ async function createRecipe(formData: FormData) {
         quantity: row.quantity,
         clerkId: `${user.id}-${recipe.id}-${row.ingredientId}`,
       })),
+      skipDuplicates: true,
     });
 
     await prisma.recipe.updateMany({

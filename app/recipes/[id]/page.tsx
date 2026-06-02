@@ -47,6 +47,7 @@ async function addIngredientToRecipe(formData: FormData) {
         clerkId: `${user.id}`,
       },
     ],
+    skipDuplicates: true,
   });
 
   const recipeIngredientRows = await prisma.recipeIngredient.findMany({
