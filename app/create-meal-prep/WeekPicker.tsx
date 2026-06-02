@@ -9,7 +9,7 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 
-export type WeekOption = {
+type WeekOption = {
   value: string;
   label: string;
   description: string;

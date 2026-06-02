@@ -1,18 +1,8 @@
-import { Ingredient, Recipe } from "@/app/generated/prisma/client";
+import { Ingredient } from "@/app/generated/prisma/client";
 import { RecipeIngredientModel } from "@/app/generated/prisma/models";
 
 export type recipeIngredient = RecipeIngredientModel & {
   ingredient?: Ingredient | null;
-};
-
-export type RecipeListItem = {
-  id: string;
-  title: string;
-  description: string | null;
-  instagramURL?: string | null;
-  type: string;
-  createdAt: string;
-  recipeIngredients: Array<{ ingredient: Ingredient; quantity: string }>;
 };
 
 export const recipeTypes = [
@@ -26,13 +16,6 @@ export const recipeTypes = [
   { value: "DESSERT", label: "Dessert", colors: "bg-pink-100 text-pink-800" },
   { value: "SNACK", label: "Snack", colors: "bg-purple-100 text-purple-800" },
 ] as const;
-
-export type RecipeWithIngredients = Recipe & {
-  recipeIngredients: Array<{
-    ingredient: Ingredient;
-    quantity: string;
-  }>;
-};
 
 export const ingredientType = [
   { value: "Protein", label: "Protein", colors: "bg-amber-100 text-amber-800" },

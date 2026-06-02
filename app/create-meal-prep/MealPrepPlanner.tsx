@@ -26,7 +26,7 @@ import { Badge } from "@/components/ui/badge";
 import { ingredientType as ingredientTypeOptions } from "@/types/types";
 import { saveWeeklyMealPrep, resetWeeklyMealPrep } from "./actions";
 
-export type RecipeItem = {
+type RecipeItem = {
   id: string;
   title: string;
   type: RecipeType;
