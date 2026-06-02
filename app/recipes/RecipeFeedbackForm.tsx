@@ -127,6 +127,7 @@ export default function RecipeFeedbackForm({
         formData.append("rating", rating);
         formData.append("easiness", easiness);
         formData.append("flavor", flavor);
+        formData.append("timeSpent", timeSpent);
         formData.append("comment", comment);
         await updateAction(formData);
       } else if (submitAction) {
@@ -135,6 +136,7 @@ export default function RecipeFeedbackForm({
         formData.append("rating", rating);
         formData.append("easiness", easiness);
         formData.append("flavor", flavor);
+        formData.append("timeSpent", timeSpent);
         formData.append("comment", comment);
         await submitAction(formData);
       }

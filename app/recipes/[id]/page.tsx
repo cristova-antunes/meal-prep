@@ -164,9 +164,10 @@ async function submitRecipeFeedback(formData: FormData) {
   const rating = parseInt(formData.get("rating")?.toString() || "0");
   const easiness = parseInt(formData.get("easiness")?.toString() || "0");
   const flavor = parseInt(formData.get("flavor")?.toString() || "0");
+  const timeSpent = formData.get("timeSpent")?.toString() || null;
   const comment = formData.get("comment")?.toString() || null;
 
-  if (!recipeId || !rating || !easiness || !flavor) {
+  if (!recipeId || !rating || !easiness || !flavor || !timeSpent) {
     throw new Error("Missing required feedback fields.");
   }
 
@@ -176,6 +177,7 @@ async function submitRecipeFeedback(formData: FormData) {
       rating,
       easiness,
       flavor,
+      timeSpent,
       comment,
       clerkId: user.id,
     },
@@ -191,15 +193,16 @@ async function updateRecipeFeedback(formData: FormData) {
   const rating = parseInt(formData.get("rating")?.toString() || "0");
   const easiness = parseInt(formData.get("easiness")?.toString() || "0");
   const flavor = parseInt(formData.get("flavor")?.toString() || "0");
+  const timeSpent = formData.get("timeSpent")?.toString() || null;
   const comment = formData.get("comment")?.toString() || null;
 
-  if (!feedbackId || !rating || !easiness || !flavor) {
+  if (!feedbackId || !rating || !easiness || !flavor || !timeSpent) {
     throw new Error("Missing required feedback fields.");
   }
 
   await prisma.recipeFeedback.updateMany({
     where: { id: feedbackId, clerkId: user.id },
-    data: { rating, easiness, flavor, comment },
+    data: { rating, easiness, flavor, timeSpent, comment },
   });
 }
 

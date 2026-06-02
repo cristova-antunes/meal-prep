@@ -33,7 +33,7 @@ model RecipeFeedback {
   rating    Int // e.g. 1 to 5
   easiness  Int? // e.g. 1 to 5
   flavor    Int? // e.g. 1 to 5
-  timeSpent Int? // e.g. 1 to 5
+  timeSpent String?
   comment   String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
