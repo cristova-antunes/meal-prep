@@ -91,6 +91,8 @@ enum RecipeType {
   VEGETARIAN
   DESSERT
   SNACK
+  BREAKFAST
+  PRE_WORKOUT
 }
 
 enum RecipeHealthStatus {

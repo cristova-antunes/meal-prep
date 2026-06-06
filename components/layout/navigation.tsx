@@ -59,15 +59,16 @@ interface MainNavMenuProps {
 
 const MainNavMenu = ({
   logo = {
-    url: "https://www.shadcnblocks.com",
-    src: "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/logos/shadcnblockscom-icon.svg",
+    url: "/",
+    src: "",
     alt: "logo",
-    title: "Shadcnblocks.com",
+    title: "Meal prep",
   },
   menu = [
-    { title: "Meal Prep", url: "/" },
-    { title: "Recipes", url: "/recipes" },
+    { title: "Plan", url: "/meal-prep" },
+    { title: "Meals", url: "/recipes" },
     { title: "Ingredients", url: "/ingredients" },
+    { title: "Grocery List", url: "/grocery" },
   ],
   auth = {
     login: { title: "Login", url: "#" },

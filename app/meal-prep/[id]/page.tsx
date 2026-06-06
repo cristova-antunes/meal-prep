@@ -108,7 +108,10 @@ export default async function MealPrepDetailPage({
           </p>
         </div>
         <div className="flex gap-2">
-          <Link href="/" className={buttonVariants({ variant: "outline" })}>
+          <Link
+            href="/meal-prep"
+            className={buttonVariants({ variant: "outline" })}
+          >
             <ArrowLeft className="mr-1" />
             Back
           </Link>
@@ -242,7 +245,7 @@ export default async function MealPrepDetailPage({
 
       <Card>
         <CardHeader>
-          <CardTitle>Total ingredients used</CardTitle>
+          <CardTitle>Shopping list</CardTitle>
         </CardHeader>
         <CardContent className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {Object.entries(
