@@ -12,7 +12,10 @@ import {
 import type { Prisma } from "@/app/generated/prisma/client";
 import IngredientsSearch from "./IngredientsSearch";
 import IngredientBadge from "@/components/feature/IngredientBadge";
+import AddToGroceryButton from "@/components/feature/AddToGroceryButton";
 import { buttonVariants } from "@/components/ui/button";
+
+// Server action moved to /app/actions/grocery.ts. Client button calls that action and shows toasts.
 
 export default async function IngredientsPage({
   searchParams,
@@ -104,11 +107,13 @@ export default async function IngredientsPage({
                   )}
                 </CardHeader>
                 <CardContent></CardContent>
-                <CardFooter className="justify-end">
+                <CardFooter className="justify-end space-x-2">
+                  <AddToGroceryButton ingredientId={ingredient.id} />
+
                   <Link
                     href={`/ingredients/${ingredient.id}`}
                     className={buttonVariants({
-                      variant: "secondary",
+                      variant: "default",
                     })}
                   >
                     Open

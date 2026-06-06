@@ -23,6 +23,7 @@ import {
   ComboboxItem,
   ComboboxList,
 } from "@/components/ui/combobox";
+import AddToGroceryButton from "@/components/feature/AddToGroceryButton";
 
 function IngredientSelect({
   allIngredients,
@@ -138,9 +139,9 @@ export default function IngredientsEditor({
             ) : (
               recipeIngredients.map((ri) => (
                 <Card size="sm" key={ri.ingredientId}>
-                  <CardContent className="flex items-center justify-between">
-                    <div>
-                      <div className="flex gap-2">
+                  <CardContent className="flex  justify-between gap-4">
+                    <div className="flex1 w-full">
+                      <div className="flex gap-2 items-center">
                         <p className="font-medium">
                           {ri.ingredient?.name ?? ri.ingredientId}
                         </p>
@@ -149,6 +150,9 @@ export default function IngredientsEditor({
                             Qty: {ri.quantity}
                           </p>
                         ) : null}
+                        <div className="ml-auto">
+                          <AddToGroceryButton ingredientId={ri.ingredientId} />
+                        </div>
                       </div>
                       <div className="text-sm text-muted-foreground">
                         {isEditing ? (
