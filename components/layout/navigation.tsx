@@ -68,6 +68,7 @@ const MainNavMenu = ({
     { title: "Plan", url: "/meal-prep" },
     { title: "Meals", url: "/recipes" },
     { title: "Ingredients", url: "/ingredients" },
+    { title: "Notes", url: "/notes" },
     { title: "Grocery List", url: "/grocery" },
   ],
   auth = {

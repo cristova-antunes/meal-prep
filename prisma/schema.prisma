@@ -111,6 +111,15 @@ model GroceryItem {
   recipes Recipe[] @relation("GroceryItemToRecipe")
 }
 
+model Note {
+  id        String   @id @default(uuid())
+  clerkId   String // Keeps it isolated per user
+  title     String
+  content   String // This will store the HTML string
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 enum RecipeType {
   MEAT
   FISH
