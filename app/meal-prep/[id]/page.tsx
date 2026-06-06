@@ -13,6 +13,9 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowLeft } from "lucide-react";
 import { WeeklyMenuWithRecipesAndIngredients } from "@/types/prisma";
 import MealPrepCookedToggle from "../MealPrepCookedToggle";
+import MealPrepShoppingList, {
+  MealPrepShoppingListItem,
+} from "../MealPrepShoppingList";
 import { currentUser } from "@clerk/nextjs/server";
 
 async function updateDailyMenuCooked(formData: FormData) {
@@ -74,6 +77,37 @@ export default async function MealPrepDetailPage({
   if (!weeklyMenu) {
     notFound();
   }
+  const shoppingListItems = Object.values(
+    weeklyMenu.recipes.reduce<Record<string, MealPrepShoppingListItem>>(
+      (acc, daily) => {
+        daily.recipes.forEach((recipe) => {
+          recipe.recipeIngredients.forEach((ri) => {
+            const ingredient = ri.ingredient;
+
+            if (!ingredient) {
+              return;
+            }
+
+            if (!acc[ingredient.id]) {
+              acc[ingredient.id] = {
+                ingredientId: ingredient.id,
+                name: ingredient.name,
+                type: ingredient.type || "Other",
+                quantity: 0,
+                recipeCount: 0,
+              };
+            }
+
+            acc[ingredient.id].quantity += Number(ri.quantity || 0);
+            acc[ingredient.id].recipeCount += 1;
+          });
+        });
+
+        return acc;
+      },
+      {},
+    ),
+  );
 
   const daysOfWeek = [
     "Sunday",
@@ -243,65 +277,7 @@ export default async function MealPrepDetailPage({
         ))}
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Shopping list</CardTitle>
-        </CardHeader>
-        <CardContent className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {Object.entries(
-            weeklyMenu.recipes.reduce<
-              Record<
-                string,
-                Record<string, { quantity: number; recipeCount: number }>
-              >
-            >((acc, daily) => {
-              daily.recipes.forEach((recipe) => {
-                recipe.recipeIngredients.forEach((ri) => {
-                  const type = ri.ingredient.type || "Other";
-                  const name = ri.ingredient.name;
-
-                  // Ensure we initialize the type group
-                  if (!acc[type]) {
-                    acc[type] = {};
-                  }
-
-                  // Ensure we initialize the ingredient
-                  if (!acc[type][name]) {
-                    acc[type][name] = { quantity: 0, recipeCount: 0 };
-                  }
-
-                  // Force TypeScript to treat quantity as a number if it's dynamic
-                  acc[type][name].quantity += Number(ri.quantity || 0);
-                  acc[type][name].recipeCount += 1;
-                });
-              });
-              return acc;
-            }, {}),
-          )
-            // Sort types alphabetically
-            .sort((a, b) => a[0].localeCompare(b[0]))
-            .map(([type, ingredients]) => (
-              <div key={type}>
-                <h3 className="font-semibold text-sm text-muted-foreground mb-3">
-                  {type}
-                </h3>
-                <ul className="text-sm space-y-2 grid grid-cols-1 ">
-                  {Object.entries(ingredients)
-                    // Sort ingredients alphabetically within each type
-                    .sort((a, b) => a[0].localeCompare(b[0]))
-                    .map(([ingredient, data]) => (
-                      <li key={ingredient} className="flex gap-2 items-center">
-                        <span>{ingredient}</span>
-                        <span className="text-muted-foreground text-xs">
-                          {data.quantity} from {data.recipeCount} recipes
-                        </span>
-                      </li>
-                    ))}
-                </ul>
-              </div>
-            ))}
-        </CardContent>
-      </Card>
+      <MealPrepShoppingList items={shoppingListItems} />
     </div>
   );
 }

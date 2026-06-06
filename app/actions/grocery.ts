@@ -31,24 +31,39 @@ export async function toggleGroceryItemCompleted(formData: FormData) {
   "use server";
 
   const user = await currentUser();
-  if (!user) return;
+  if (!user) return { ok: false, error: "unauthenticated" };
 
   const itemId = formData.get("itemId")?.toString();
   const isCompletedValue = formData.get("isCompleted")?.toString();
 
   if (!itemId || !isCompletedValue) {
-    return;
+    return { ok: false, error: "missing parameters" };
   }
 
-  await prisma.groceryItem.updateMany({
-    where: { id: itemId, clerkId: user.id },
-    data: { isCompleted: isCompletedValue === "true" },
+  const groceryItem = await prisma.groceryItem.findUnique({
+    where: { id: itemId },
+    select: { clerkId: true },
   });
 
+  if (!groceryItem || groceryItem.clerkId !== user.id) {
+    return { ok: false, error: "not found or unauthorized" };
+  }
+
   try {
-    revalidatePath("/grocery");
-  } catch (e) {
-    // ignore
+    await prisma.groceryItem.update({
+      where: { id: itemId },
+      data: { isCompleted: isCompletedValue === "true" },
+    });
+
+    try {
+      revalidatePath("/grocery");
+    } catch (e) {
+      // ignore
+    }
+
+    return { ok: true };
+  } catch (err) {
+    return { ok: false, error: String(err) };
   }
 }
 

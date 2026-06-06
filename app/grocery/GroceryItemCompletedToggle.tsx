@@ -12,21 +12,48 @@ export default function GroceryItemCompletedToggle({
 }: {
   itemId: string;
   isCompleted: boolean;
-  toggleCompleted: (formData: FormData) => Promise<void>;
+  toggleCompleted: (
+    formData: FormData,
+  ) => Promise<{ ok: boolean; error?: string }>;
 }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [checked, setChecked] = React.useState(isCompleted);
 
+  // keep local state in sync with server-provided prop
+  React.useEffect(() => {
+    // perform the update as a low-priority transition and use a
+    // functional updater so we don't reference `checked` here.
+    startTransition(() => {
+      setChecked((prev) => (prev !== isCompleted ? isCompleted : prev));
+    });
+  }, [isCompleted, startTransition]);
+
+  // optimistic UI: show local state immediately
+  const displayedChecked = checked;
+
   async function handleChange(checkedValue: boolean | "indeterminate") {
     const nextChecked = checkedValue === true;
+    const previous = checked;
     setChecked(nextChecked);
 
     const formData = new FormData();
     formData.set("itemId", itemId);
     formData.set("isCompleted", nextChecked ? "true" : "false");
 
-    await toggleCompleted(formData);
+    try {
+      const res = await toggleCompleted(formData as FormData);
+      if (res.ok === false) {
+        console.error("toggleCompleted returned error:", res.error);
+        setChecked(previous);
+        return;
+      }
+    } catch (err) {
+      // revert optimistic update on error
+      console.error("toggleCompleted failed:", err);
+      setChecked(previous);
+      return;
+    }
 
     startTransition(() => {
       router.refresh();
@@ -35,14 +62,8 @@ export default function GroceryItemCompletedToggle({
 
   return (
     <div className="inline-flex items-center gap-2">
-      <input type="hidden" name="itemId" value={itemId} />
-      <input
-        type="hidden"
-        name="isCompleted"
-        value={checked ? "true" : "false"}
-      />
       <Checkbox
-        checked={checked}
+        checked={displayedChecked}
         onCheckedChange={handleChange}
         disabled={isPending}
       />

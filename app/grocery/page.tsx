@@ -150,7 +150,7 @@ export default async function GroceryPage() {
           <form action={clearCompletedGroceryItems} className="sm:ml-auto">
             <Button
               type="submit"
-              variant="outline"
+              variant="secondary"
               size="sm"
               disabled={completedCount === 0}
             >
