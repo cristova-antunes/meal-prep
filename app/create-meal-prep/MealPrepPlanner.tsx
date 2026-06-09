@@ -222,9 +222,13 @@ export default function MealPrepPlanner({
       const slotDates = Object.fromEntries(
         slots.map((slot) => [slot.id, slot.date]),
       );
-      await saveWeeklyMealPrep(weeklyMenuId, assignments, slotDates);
+      const result = await saveWeeklyMealPrep(
+        weeklyMenuId,
+        assignments,
+        slotDates,
+      );
       setSuccess("Meal prep plan saved successfully!");
-      router.push(`/meal-prep/${weeklyMenuId}`);
+      router.push(`/meal-prep/${result.weeklyMenuId}`);
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "Failed to save meal prep plan",

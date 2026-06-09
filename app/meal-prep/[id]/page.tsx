@@ -119,9 +119,17 @@ export default async function MealPrepDetailPage({
     "Saturday",
   ];
 
-  // Group daily menus by day of week
+  // Group daily menus by day of week based on their actual date
+  const recipesByDayIndex = weeklyMenu.recipes.reduce<
+    Record<number, (typeof weeklyMenu.recipes)[0]>
+  >((acc, recipe) => {
+    const dayIndex = new Date(recipe.date).getDay();
+    acc[dayIndex] = recipe;
+    return acc;
+  }, {});
+
   const dailyMenusByDay = daysOfWeek.map((day, index) => {
-    const dailyMenu = weeklyMenu.recipes[index];
+    const dailyMenu = recipesByDayIndex[index];
     return {
       day,
       dailyMenu,

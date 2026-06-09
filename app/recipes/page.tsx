@@ -99,6 +99,12 @@ export default async function RecipesPage({
       _count: {
         select: { recipeFeedbacks: true },
       },
+      dailyMenus: {
+        where: {
+          weeklyMenus: { some: {} },
+        },
+        select: { id: true },
+      },
     },
   })) as unknown as RecipesWithCount;
 
@@ -145,8 +151,13 @@ export default async function RecipesPage({
                       </Badge>
                     )}
                     {r._count.recipeFeedbacks > 0 && (
-                      <Badge className="bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300 ml-2">
+                      <Badge className="bg-olive-50 text-olive-700 dark:bg-olive-950 dark:text-olive-300 ml-2">
                         Feedback
+                      </Badge>
+                    )}
+                    {r.dailyMenus.length > 0 && (
+                      <Badge className="bg-indigo-50 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300 ml-2">
+                        Cooked {r.dailyMenus.length}x
                       </Badge>
                     )}
                     {r.isFavorite && (
@@ -165,7 +176,7 @@ export default async function RecipesPage({
                     <p className="text-sm">{r.description}</p>
                   ) : null}
                 </CardContent>
-                <CardFooter className="justify-end">
+                <CardFooter className="justify-end gap-s">
                   {r.instagramURL ? (
                     <Link
                       href={r.instagramURL}

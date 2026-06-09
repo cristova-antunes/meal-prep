@@ -14,6 +14,7 @@ export type RecipesWithCount = Prisma.Result<
       description: true;
       isFavorite: true;
       _count: { select: { recipeFeedbacks: true } };
+      dailyMenus: { id: true }[];
     };
   },
   "findMany"
