@@ -1,4 +1,3 @@
-import "ckeditor5/ckeditor5.css";
 import { currentUser } from "@clerk/nextjs/server";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
@@ -22,10 +21,5 @@ export default async function EditNotePage({
     notFound();
   }
 
-  const CK_KEY = process.env.CK_EDITOR_KEY;
-  if (!CK_KEY || CK_KEY === "") {
-    return null;
-  }
-
-  return <EditNoteForm note={note} ckEditorKey={CK_KEY} />;
+  return <EditNoteForm note={note} />;
 }
