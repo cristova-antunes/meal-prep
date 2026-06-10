@@ -308,8 +308,18 @@ export const editorTheme = {
     bold: "font-bold",
     italic: "italic",
   },
+  heading: {
+    h1: "text-3xl font-bold my-3",
+    h2: "text-2xl font-bold my-2",
+    h3: "text-xl font-bold my-2",
+  },
+  list: {
+    ul: "list-disc list-outside pl-6 my-2",
+    ol: "list-decimal list-outside pl-6 my-2",
+    listitem: "my-1",
+  },
+  link: "text-blue-600 underline cursor-pointer hover:text-blue-800",
 };
-
 export function HtmlOnChangePlugin({
   onChange,
 }: {
