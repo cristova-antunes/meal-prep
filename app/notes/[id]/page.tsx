@@ -1,8 +1,9 @@
 import { currentUser } from "@clerk/nextjs/server";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { buttonVariants } from "@/components/ui/button";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
+import DeleteNoteForm from "../DeleteNoteForm";
 import {
   Card,
   CardContent,
@@ -12,14 +13,45 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 
-export default async function NotePage({ params }: { params: { id: string } }) {
+async function deleteNote(formData: FormData) {
+  "use server";
+
   const user = await currentUser();
+
+  if (!user) {
+    throw new Error("You must be signed in to delete notes.");
+  }
+
+  const noteId = formData.get("noteId")?.toString();
+
+  if (!noteId) {
+    throw new Error("Note id is required.");
+  }
+
+  await prisma.note.deleteMany({
+    where: {
+      id: noteId,
+      clerkId: user.id,
+    },
+  });
+
+  redirect("/notes");
+}
+
+export default async function NotePage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const user = await currentUser();
+  const resolvedParams = await params;
+
   if (!user) {
     notFound();
   }
 
   const note = await prisma.note.findUnique({
-    where: { id: params.id },
+    where: { id: resolvedParams.id },
   });
 
   if (!note || note.clerkId !== user.id) {
@@ -42,9 +74,20 @@ export default async function NotePage({ params }: { params: { id: string } }) {
             }).format(note.updatedAt)}
           </p>
         </div>
-        <Link href="/notes" className={buttonVariants({ variant: "outline" })}>
-          Back to notes
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link
+            href="/notes"
+            className={buttonVariants({ variant: "outline" })}
+          >
+            Back to notes
+          </Link>
+          <Link
+            href="/create-note"
+            className={buttonVariants({ variant: "default" })}
+          >
+            Create another note
+          </Link>
+        </div>
       </div>
 
       <Card>
@@ -60,19 +103,14 @@ export default async function NotePage({ params }: { params: { id: string } }) {
             dangerouslySetInnerHTML={{ __html: note.content }}
           />
         </CardContent>
-        <CardFooter className="justify-between">
+        <CardFooter className="justify-end items-center gap-4">
           <Link
             href={`/notes/${note.id}/edit`}
             className={buttonVariants({ variant: "outline" })}
           >
             Edit note
           </Link>
-          <Link
-            href="/create-note"
-            className={buttonVariants({ variant: "default" })}
-          >
-            Create another note
-          </Link>
+          <DeleteNoteForm noteId={note.id} deleteAction={deleteNote} />
         </CardFooter>
       </Card>
     </main>

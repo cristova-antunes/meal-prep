@@ -6,15 +6,17 @@ import EditNoteForm from "./EditNoteForm";
 export default async function EditNotePage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
   const user = await currentUser();
+  const resolvedParams = await params;
+
   if (!user) {
     notFound();
   }
 
   const note = await prisma.note.findUnique({
-    where: { id: params.id },
+    where: { id: resolvedParams.id },
   });
 
   if (!note || note.clerkId !== user.id) {
