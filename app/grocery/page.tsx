@@ -195,7 +195,7 @@ export default async function GroceryPage() {
                     {category !== "Other" && category !== undefined ? (
                       <IngredientBadge type={category as IngredientTypeEnum} />
                     ) : (
-                      <Badge>Other</Badge>
+                      <Badge variant={"outline"}>Other</Badge>
                     )}
                   </div>
 
@@ -205,39 +205,21 @@ export default async function GroceryPage() {
                         item.customName ??
                         item.ingredient?.name ??
                         "Unknown item";
-                      const subtitle = item.customName
-                        ? item.customType
-                          ? item.customType
-                          : "Manual item"
-                        : item.ingredient?.name;
 
                       return (
-                        <div
-                          key={item.id}
-                          className="rounded-2xl border border-border bg-background px-4 py-3 sm:flex sm:items-center sm:justify-between"
-                        >
-                          <div className="flex items-start gap-3">
+                        <Card key={item.id}>
+                          <CardContent className="sm:flex sm:items-center sm:justify-between">
                             <GroceryItemCompletedToggle
                               itemId={item.id}
                               isCompleted={item.isCompleted}
                               toggleCompleted={toggleGroceryItemCompleted}
+                              label={label}
                             />
-                            <div>
-                              <p
-                                className={`font-medium ${
-                                  item.isCompleted
-                                    ? "line-through text-muted-foreground"
-                                    : ""
-                                }`}
-                              >
-                                {label}
-                              </p>
-                            </div>
-                          </div>
-                          <span className="mt-3 inline-flex items-center rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground sm:mt-0">
-                            Qty {item.quantity}
-                          </span>
-                        </div>
+                            <span className="mt-3 inline-flex items-center rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground sm:mt-0">
+                              Qty {item.quantity}
+                            </span>
+                          </CardContent>
+                        </Card>
                       );
                     })}
                   </div>

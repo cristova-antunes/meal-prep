@@ -9,9 +9,11 @@ export default function GroceryItemCompletedToggle({
   itemId,
   isCompleted,
   toggleCompleted,
+  label,
 }: {
   itemId: string;
   isCompleted: boolean;
+  label: string;
   toggleCompleted: (
     formData: FormData,
   ) => Promise<{ ok: boolean; error?: string }>;
@@ -63,11 +65,20 @@ export default function GroceryItemCompletedToggle({
   return (
     <div className="inline-flex items-center gap-2">
       <Checkbox
+        id={itemId}
         checked={displayedChecked}
         onCheckedChange={handleChange}
         disabled={isPending}
       />
-      <span className="sr-only">Mark grocery item completed</span>
+      <label
+        aria-label={`Mark ${label} as completed"`}
+        htmlFor={itemId}
+        className={`font-medium ${
+          isCompleted ? "line-through text-muted-foreground" : ""
+        }`}
+      >
+        {label}
+      </label>
     </div>
   );
 }
