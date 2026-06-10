@@ -4,6 +4,7 @@ import { currentUser } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 import IngredientBadge from "@/components/feature/IngredientBadge";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { ingredientType } from "@/types/types";
 import { redirect } from "next/navigation";
 import type { IngredientType as IngredientTypeEnum } from "@/app/generated/prisma/client";
@@ -12,6 +13,7 @@ import {
   toggleGroceryItemCompleted,
 } from "@/app/actions/grocery";
 import GroceryItemCompletedToggle from "./GroceryItemCompletedToggle";
+import { Badge } from "@/components/ui/badge";
 
 const categoryOrder = [
   ...ingredientType.map((item) => item.value),
@@ -89,14 +91,16 @@ export default async function GroceryPage() {
   if (!user) {
     return (
       <div>
-        <div className="rounded-3xl border border-border bg-card p-10 text-center shadow-sm">
-          <h1 className="text-3xl font-semibold">
-            Sign in to view your grocery list
-          </h1>
-          <p className="mt-4 text-sm text-muted-foreground">
-            Your grocery list is stored per Clerk user.
-          </p>
-        </div>
+        <Card>
+          <CardContent>
+            <h1 className="text-3xl font-semibold">
+              Sign in to view your grocery list
+            </h1>
+            <p className="mt-4 text-sm text-muted-foreground">
+              Your grocery list is stored per Clerk user.
+            </p>
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -163,94 +167,82 @@ export default async function GroceryPage() {
       </div>
 
       {groceryItems.length === 0 ? (
-        <div className="rounded-3xl border border-border bg-card p-10 text-center shadow-sm">
-          <p className="text-sm text-muted-foreground">
-            Your grocery list is empty. Add a manual item or populate it from
-            recipes.
-          </p>
-        </div>
+        <Card className="text-center">
+          <CardContent>
+            <p className="text-sm text-muted-foreground">
+              Your grocery list is empty. Add a manual item or populate it from
+              recipes.
+            </p>
+          </CardContent>
+        </Card>
       ) : (
         <div className="space-y-6">
           {sortedCategories.map((category) => {
             const items = groupedItems.get(category) ?? [];
 
             return (
-              <section
-                key={category}
-                className="rounded-3xl border border-border bg-card p-6"
-              >
-                <div className="mb-4 flex items-center justify-between gap-4">
-                  <div>
-                    <h2 className="text-xl font-semibold">
-                      {getCategoryLabel(category)}
-                    </h2>
-                    <p className="text-sm text-muted-foreground">
-                      {items.length} item{items.length === 1 ? "" : "s"}
-                    </p>
+              <Card key={category}>
+                <CardContent>
+                  <div className="mb-4 flex items-center justify-between gap-4">
+                    <div>
+                      <h2 className="text-xl font-semibold">
+                        {getCategoryLabel(category)}
+                      </h2>
+                      <p className="text-sm text-muted-foreground">
+                        {items.length} item{items.length === 1 ? "" : "s"}
+                      </p>
+                    </div>
+                    {category !== "Other" && category !== undefined ? (
+                      <IngredientBadge type={category as IngredientTypeEnum} />
+                    ) : (
+                      <Badge>Other</Badge>
+                    )}
                   </div>
-                  {category !== "Other" && category !== undefined ? (
-                    <IngredientBadge type={category as IngredientTypeEnum} />
-                  ) : (
-                    <span className="rounded-full border border-border px-3 py-1 text-xs font-medium uppercase tracking-[0.15em] text-muted-foreground">
-                      Other
-                    </span>
-                  )}
-                </div>
 
-                <div className="space-y-3">
-                  {items.map((item) => {
-                    const label =
-                      item.customName ??
-                      item.ingredient?.name ??
-                      "Unknown item";
-                    const subtitle = item.customName
-                      ? item.customType
+                  <div className="space-y-3">
+                    {items.map((item) => {
+                      const label =
+                        item.customName ??
+                        item.ingredient?.name ??
+                        "Unknown item";
+                      const subtitle = item.customName
                         ? item.customType
-                        : "Manual item"
-                      : item.ingredient?.name;
+                          ? item.customType
+                          : "Manual item"
+                        : item.ingredient?.name;
 
-                    return (
-                      <div
-                        key={item.id}
-                        className="rounded-2xl border border-border bg-background px-4 py-3 sm:flex sm:items-center sm:justify-between"
-                      >
-                        <div className="flex items-start gap-3">
-                          <GroceryItemCompletedToggle
-                            itemId={item.id}
-                            isCompleted={item.isCompleted}
-                            toggleCompleted={toggleGroceryItemCompleted}
-                          />
-                          <div>
-                            <p
-                              className={`font-medium ${
-                                item.isCompleted
-                                  ? "line-through text-muted-foreground"
-                                  : ""
-                              }`}
-                            >
-                              {label}
-                            </p>
-                            {subtitle ? (
+                      return (
+                        <div
+                          key={item.id}
+                          className="rounded-2xl border border-border bg-background px-4 py-3 sm:flex sm:items-center sm:justify-between"
+                        >
+                          <div className="flex items-start gap-3">
+                            <GroceryItemCompletedToggle
+                              itemId={item.id}
+                              isCompleted={item.isCompleted}
+                              toggleCompleted={toggleGroceryItemCompleted}
+                            />
+                            <div>
                               <p
-                                className={`text-sm ${
+                                className={`font-medium ${
                                   item.isCompleted
-                                    ? "text-muted-foreground"
-                                    : "text-muted-foreground"
+                                    ? "line-through text-muted-foreground"
+                                    : ""
                                 }`}
                               >
-                                {subtitle}
+                                {label}
                               </p>
-                            ) : null}
+                            </div>
                           </div>
+                          <span className="mt-3 inline-flex items-center rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground sm:mt-0">
+                            Qty {item.quantity}
+                          </span>
                         </div>
-                        <span className="mt-3 inline-flex items-center rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground sm:mt-0">
-                          Qty {item.quantity}
-                        </span>
-                      </div>
-                    );
-                  })}
-                </div>
-              </section>
+                      );
+                    })}
+                  </div>
+                </CardContent>
+              </Card>
             );
           })}
         </div>

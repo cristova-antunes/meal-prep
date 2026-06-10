@@ -144,24 +144,8 @@ export default async function RecipesPage({
                     <Link href={`/recipes/${r.id}`}>{r.title}</Link>
                   </CardTitle>
                   <CardDescription>
-                    <RecipeTypeBadge type={r.type} />
-                    {r.isCustom && (
-                      <Badge variant="outline" className="ml-2">
-                        Custom
-                      </Badge>
-                    )}
-                    {r._count.recipeFeedbacks > 0 && (
-                      <Badge className="bg-olive-50 text-olive-700 dark:bg-olive-950 dark:text-olive-300 ml-2">
-                        Feedback
-                      </Badge>
-                    )}
-                    {r.dailyMenus.length > 0 && (
-                      <Badge className="bg-indigo-50 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300 ml-2">
-                        Cooked {r.dailyMenus.length}x
-                      </Badge>
-                    )}
                     {r.isFavorite && (
-                      <div className="inline-flex items-center ml-2 ">
+                      <div className="inline-flex items-center mb-2 ">
                         <Heart
                           fill="currentColor"
                           className="mr-1 text-amber-500"
@@ -169,6 +153,21 @@ export default async function RecipesPage({
                         <span className="text-sm">Favorite</span>
                       </div>
                     )}
+                    <div className="flex items-center gap-2">
+                      {" "}
+                      <RecipeTypeBadge type={r.type} />
+                      {r.isCustom && <Badge variant="outline">Custom</Badge>}
+                      {r._count.recipeFeedbacks > 0 && (
+                        <Badge className="bg-olive-50 text-olive-700 dark:bg-olive-950 dark:text-olive-300 ">
+                          Feedback
+                        </Badge>
+                      )}
+                      {r.dailyMenus.length > 0 && (
+                        <Badge className="bg-indigo-50 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300 ">
+                          Cooked {r.dailyMenus.length}x
+                        </Badge>
+                      )}
+                    </div>
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -176,7 +175,7 @@ export default async function RecipesPage({
                     <p className="text-sm">{r.description}</p>
                   ) : null}
                 </CardContent>
-                <CardFooter className="justify-end gap-s">
+                <CardFooter className="justify-end gap-4">
                   {r.instagramURL ? (
                     <Link
                       href={r.instagramURL}
