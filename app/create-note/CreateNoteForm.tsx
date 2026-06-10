@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { RichTextEditor } from "@/components/feature/RichTextEditor";
-import { EMPTY_EDITOR_STATE } from "@/components/feature/lexical";
+import { EMPTY_EDITOR_STATE } from "@/components/feature/RichTextEditorConfigs";
 import { createNote } from "./actions";
 
 // ---------------------------------------------------------------------------

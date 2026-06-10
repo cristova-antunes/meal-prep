@@ -9,7 +9,11 @@ import { LinkPlugin } from "@lexical/react/LexicalLinkPlugin";
 import { LexicalErrorBoundary } from "@lexical/react/LexicalErrorBoundary";
 import { LexicalEditor } from "lexical";
 
-import { ToolbarPlugin, HtmlOnChangePlugin, getInitialConfig } from "./lexical";
+import {
+  ToolbarPlugin,
+  HtmlOnChangePlugin,
+  getInitialConfig,
+} from "./RichTextEditorConfigs";
 
 interface RichTextEditorProps {
   /** Callback fired when editor content changes (receives HTML string) */
