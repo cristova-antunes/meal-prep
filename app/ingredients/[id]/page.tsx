@@ -1,6 +1,6 @@
 import { currentUser } from "@clerk/nextjs/server";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { buttonVariants } from "@/components/ui/button";
 import {
@@ -8,17 +8,44 @@ import {
   CardContent,
   CardDescription,
   CardHeader,
+  CardFooter,
   CardTitle,
 } from "@/components/ui/card";
 import { ArrowLeft } from "lucide-react";
 import IngredientBadge from "@/components/feature/IngredientBadge";
 import { IngredientWithTheirRecipes } from "@/types/prisma";
+import DeleteIngredientForm from "../DeleteIngredientForm";
 
 export default async function IngredientDetailPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
+  async function deleteIngredient(formData: FormData) {
+    "use server";
+
+    const user = await currentUser();
+
+    if (!user) {
+      throw new Error("You must be signed in to delete ingredients.");
+    }
+
+    const ingredientId = formData.get("ingredientId")?.toString();
+
+    if (!ingredientId) {
+      throw new Error("Ingredient id is required.");
+    }
+
+    await prisma.ingredient.deleteMany({
+      where: {
+        id: ingredientId,
+        clerkId: user.id,
+      },
+    });
+
+    redirect("/ingredients");
+  }
+
   const user = await currentUser();
   const resolvedParams = await params;
 
@@ -115,6 +142,12 @@ export default async function IngredientDetailPage({
             </ul>
           )}
         </CardContent>
+        <CardFooter className="justify-end items-center gap-4">
+          <DeleteIngredientForm
+            ingredientId={ingredient.id}
+            deleteAction={deleteIngredient}
+          />
+        </CardFooter>
       </Card>
     </main>
   );
