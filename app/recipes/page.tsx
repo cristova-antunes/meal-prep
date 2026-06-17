@@ -47,6 +47,9 @@ export default async function RecipesPage({
   const typeParam = Array.isArray(searchParamsResolved?.type)
     ? searchParamsResolved?.type[0]
     : searchParamsResolved?.type;
+  const sortParam = Array.isArray(searchParamsResolved?.sort)
+    ? searchParamsResolved?.sort[0]
+    : searchParamsResolved?.sort;
   const customOnly =
     (Array.isArray(searchParamsResolved?.customOnly)
       ? searchParamsResolved?.customOnly[0]
@@ -83,9 +86,24 @@ export default async function RecipesPage({
     where.NOT = { dailyMenus: { some: { weeklyMenus: { some: {} } } } };
   }
 
+  type RecipeSortParam = "title_asc" | "created_asc" | "created_desc";
+  const normalizedSortParam: RecipeSortParam =
+    sortParam === "created_desc"
+      ? "created_desc"
+      : sortParam === "created_asc"
+        ? "created_asc"
+        : "title_asc";
+
+  const orderBy: Prisma.RecipeOrderByWithRelationInput =
+    normalizedSortParam === "created_desc"
+      ? { createdAt: "desc" }
+      : normalizedSortParam === "created_asc"
+        ? { createdAt: "asc" }
+        : { title: "asc" };
+
   const recipes = (await prisma.recipe.findMany({
     where,
-    orderBy: { title: "asc" },
+    orderBy,
     cacheStrategy: { ttl: 60, swr: 10 },
     select: {
       id: true,
@@ -123,6 +141,7 @@ export default async function RecipesPage({
       <RecipeFilters
         initialQ={typeof qParam === "string" ? qParam : ""}
         initialType={typeof typeParam === "string" ? typeParam : "ALL"}
+        initialSort={typeof sortParam === "string" ? sortParam : "title_asc"}
         initialCustomOnly={customOnly}
         initialInstagramOnly={instagramOnly}
         initialNeverCooked={neverCooked}

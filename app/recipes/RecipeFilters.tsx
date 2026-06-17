@@ -17,6 +17,7 @@ import {
 type RecipeFiltersProps = {
   initialQ?: string;
   initialType?: string;
+  initialSort?: string;
   initialCustomOnly?: boolean;
   initialInstagramOnly?: boolean;
   initialNeverCooked?: boolean;
@@ -25,12 +26,14 @@ type RecipeFiltersProps = {
 function buildQueryUrl({
   q,
   type,
+  sort,
   customOnly,
   instagramOnly,
   neverCooked,
 }: {
   q: string;
   type: string;
+  sort: string;
   customOnly: boolean;
   instagramOnly: boolean;
   neverCooked: boolean;
@@ -43,6 +46,10 @@ function buildQueryUrl({
 
   if (type !== "ALL") {
     params.set("type", type);
+  }
+
+  if (sort !== "title_asc") {
+    params.set("sort", sort);
   }
 
   if (customOnly) {
@@ -63,6 +70,7 @@ function buildQueryUrl({
 export default function RecipeFilters({
   initialQ,
   initialType,
+  initialSort,
   initialCustomOnly,
   initialInstagramOnly,
   initialNeverCooked,
@@ -71,6 +79,7 @@ export default function RecipeFilters({
   const [isPending, startTransition] = useTransition();
   const [q, setQ] = useState(initialQ ?? "");
   const [type, setType] = useState(initialType ?? "ALL");
+  const [sort, setSort] = useState(initialSort ?? "title_asc");
   const [customOnly, setCustomOnly] = useState(!!initialCustomOnly);
   const [instagramOnly, setInstagramOnly] = useState(!!initialInstagramOnly);
   const [neverCooked, setNeverCooked] = useState(!!initialNeverCooked);
@@ -79,12 +88,14 @@ export default function RecipeFilters({
     ({
       q: nextQ = q,
       type: nextType = type,
+      sort: nextSort = sort,
       customOnly: nextCustomOnly = customOnly,
       instagramOnly: nextInstagramOnly = instagramOnly,
       neverCooked: nextNeverCooked = neverCooked,
     }: {
       q?: string;
       type?: string;
+      sort?: string;
       customOnly?: boolean;
       instagramOnly?: boolean;
       neverCooked?: boolean;
@@ -92,6 +103,7 @@ export default function RecipeFilters({
       const href = buildQueryUrl({
         q: nextQ,
         type: nextType,
+        sort: nextSort,
         customOnly: nextCustomOnly,
         instagramOnly: nextInstagramOnly,
         neverCooked: nextNeverCooked,
@@ -101,13 +113,14 @@ export default function RecipeFilters({
         router.replace(href);
       });
     },
-    [customOnly, instagramOnly, neverCooked, q, router, type],
+    [customOnly, instagramOnly, neverCooked, q, router, sort, type],
   );
 
   const updateNow = useCallback(
     (changes: {
       q?: string;
       type?: string;
+      sort?: string;
       customOnly?: boolean;
       instagramOnly?: boolean;
       neverCooked?: boolean;
@@ -151,6 +164,25 @@ export default function RecipeFilters({
               <SelectItem value="VEGETARIAN">Vegetarian</SelectItem>
               <SelectItem value="DESSERT">Dessert</SelectItem>
               <SelectItem value="SNACK">Snack</SelectItem>
+            </SelectGroup>
+          </SelectContent>
+        </Select>
+
+        <Select
+          value={sort}
+          onValueChange={(value) => {
+            setSort(value);
+            updateNow({ sort: value });
+          }}
+        >
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Sort" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectGroup>
+              <SelectItem value="title_asc">Title (Asc)</SelectItem>
+              <SelectItem value="created_asc">Created (Asc)</SelectItem>
+              <SelectItem value="created_desc">Created (Desc)</SelectItem>
             </SelectGroup>
           </SelectContent>
         </Select>
