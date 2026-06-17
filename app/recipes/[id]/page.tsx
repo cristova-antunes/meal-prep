@@ -359,8 +359,10 @@ export default async function RecipeDetailPage({
         </div>
       </div>
 
+      <RecipeHealthAnalyzer recipeIngredients={recipe.recipeIngredients} />
+
       {recipe.description ? (
-        <Card className="my-6">
+        <Card className="my-6  border-indigo-400 bg-indigo-100">
           <CardHeader>
             <CardTitle>Notes</CardTitle>
           </CardHeader>
@@ -370,8 +372,6 @@ export default async function RecipeDetailPage({
           </CardContent>
         </Card>
       ) : null}
-
-      <RecipeHealthAnalyzer recipeIngredients={recipe.recipeIngredients} />
 
       <div className="grid md:grid-cols-2 gap-6">
         <IngredientsEditor
