@@ -72,19 +72,12 @@ async function removeIngredientFromRecipe(formData: FormData) {
   if (!user) throw new Error("You must be signed in to modify recipes.");
 
   const recipeId = formData.get("recipeId")?.toString();
-  const ingredientName = formData.get("ingredientName")?.toString();
+  const ingredientId = formData.get("ingredientId")?.toString();
 
-  if (!recipeId || !ingredientName) throw new Error("Missing ids.");
-
-  const ingredient = await prisma.ingredient.findFirst({
-    where: { name: ingredientName, clerkId: user.id },
-    cacheStrategy: { ttl: 60, swr: 10 },
-  });
-
-  if (!ingredient) throw new Error("Ingredient not found.");
+  if (!recipeId || !ingredientId) throw new Error("Missing ids.");
 
   await prisma.recipeIngredient.deleteMany({
-    where: { recipeId, ingredientId: ingredient.id },
+    where: { recipeId, ingredientId, clerkId: user.id },
   });
 
   const recipeIngredientRows = await prisma.recipeIngredient.findMany({
@@ -121,20 +114,13 @@ async function updateIngredientQuantity(formData: FormData) {
   if (!user) throw new Error("You must be signed in to modify recipes.");
 
   const recipeId = formData.get("recipeId")?.toString();
-  const ingredientName = formData.get("ingredientName")?.toString();
+  const ingredientId = formData.get("ingredientId")?.toString();
   const quantity = (formData.get("quantity")?.toString() || "1").trim();
 
-  if (!recipeId || !ingredientName) throw new Error("Missing ids.");
-
-  const ingredient = await prisma.ingredient.findFirst({
-    where: { name: ingredientName, clerkId: user.id },
-    cacheStrategy: { ttl: 60, swr: 10 },
-  });
-
-  if (!ingredient) throw new Error("Ingredient not found.");
+  if (!recipeId || !ingredientId) throw new Error("Missing ids.");
 
   await prisma.recipeIngredient.updateMany({
-    where: { recipeId, ingredientId: ingredient.id },
+    where: { recipeId, ingredientId, clerkId: user.id },
     data: { quantity },
   });
 }
