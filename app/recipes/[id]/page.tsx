@@ -16,6 +16,15 @@ import RecipeHealthAnalyzer from "@/components/feature/RecipeHealthAnalyzer";
 import FavoriteToggle from "../FavoriteToggle";
 import EditRecipeForm from "../EditRecipeForm";
 import { Badge } from "@/components/ui/badge";
+import { revalidatePath } from "next/cache";
+
+async function invalidateRecipeCache(recipeId: string) {
+  await prisma.$accelerate.invalidate({
+    tags: [`recipe_${recipeId.replaceAll("-", "_")}`],
+  });
+
+  revalidatePath(`/recipes/${recipeId}`);
+}
 
 async function addIngredientToRecipe(formData: FormData) {
   "use server";
@@ -64,6 +73,8 @@ async function addIngredientToRecipe(formData: FormData) {
       ),
     },
   });
+
+  await invalidateRecipeCache(recipeId);
 }
 
 async function removeIngredientFromRecipe(formData: FormData) {
@@ -94,6 +105,8 @@ async function removeIngredientFromRecipe(formData: FormData) {
       ),
     },
   });
+
+  await invalidateRecipeCache(recipeId);
 }
 
 async function deleteRecipe(formData: FormData) {
@@ -123,6 +136,8 @@ async function updateIngredientQuantity(formData: FormData) {
     where: { recipeId, ingredientId, clerkId: user.id },
     data: { quantity },
   });
+
+  await invalidateRecipeCache(recipeId);
 }
 
 async function toggleFavorite(formData: FormData) {
@@ -222,6 +237,8 @@ async function updateRecipe(formData: FormData) {
     where: { id: recipeId, clerkId: user.id },
     data: { title, description },
   });
+
+  await invalidateRecipeCache(recipeId);
 }
 
 export default async function RecipeDetailPage({
@@ -249,7 +266,11 @@ export default async function RecipeDetailPage({
 
   const recipe = await prisma.recipe.findUnique({
     where: { id },
-    cacheStrategy: { ttl: 60, swr: 10 },
+    cacheStrategy: {
+      tags: [`recipe_${id.replaceAll("-", "_")}`],
+      ttl: 60,
+      swr: 10,
+    },
     include: {
       recipeIngredients: { include: { ingredient: true } },
       dailyMenus: {
