@@ -6,10 +6,11 @@ import IngredientBadge from "@/components/feature/IngredientBadge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ingredientType } from "@/types/types";
-import { redirect } from "next/navigation";
 import type { IngredientType as IngredientTypeEnum } from "@/app/generated/prisma/client";
 import {
   clearCompletedGroceryItems,
+  getGroceryCacheTag,
+  invalidateGroceryCache,
   toggleGroceryItemCompleted,
 } from "@/app/actions/grocery";
 import GroceryItemCompletedToggle from "./GroceryItemCompletedToggle";
@@ -64,7 +65,7 @@ async function addGroceryItem(formData: FormData) {
     },
   });
 
-  redirect("/grocery");
+  await invalidateGroceryCache(user.id);
 }
 
 function getCategoryLabel(category: GroceryCategory) {
@@ -108,7 +109,7 @@ export default async function GroceryPage() {
   const groceryItems = (await prisma.groceryItem.findMany({
     where: { clerkId: user.id },
     orderBy: [{ customName: "asc" }, { quantity: "desc" }],
-    cacheStrategy: { ttl: 60, swr: 10 },
+    cacheStrategy: { tags: [getGroceryCacheTag(user.id)], ttl: 60, swr: 10 },
     select: {
       id: true,
       quantity: true,

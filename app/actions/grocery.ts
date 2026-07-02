@@ -2,6 +2,17 @@ import { currentUser } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 
+export const getGroceryCacheTag = (userId: string) =>
+  `grocery_${userId.replaceAll("-", "_")}`;
+
+export async function invalidateGroceryCache(userId: string) {
+  await prisma.$accelerate.invalidate({
+    tags: [getGroceryCacheTag(userId)],
+  });
+
+  revalidatePath(`/grocery`);
+}
+
 export async function addToGrocery(ingredientId: string) {
   "use server";
 
@@ -15,11 +26,7 @@ export async function addToGrocery(ingredientId: string) {
       create: { clerkId: user.id, ingredientId },
     });
 
-    try {
-      revalidatePath("/grocery");
-    } catch (e) {
-      // ignore
-    }
+    await invalidateGroceryCache(user.id);
 
     return { ok: true };
   } catch (err) {
@@ -55,11 +62,7 @@ export async function toggleGroceryItemCompleted(formData: FormData) {
       data: { isCompleted: isCompletedValue === "true" },
     });
 
-    try {
-      revalidatePath("/grocery");
-    } catch (e) {
-      // ignore
-    }
+    revalidatePath("/grocery");
 
     return { ok: true };
   } catch (err) {
@@ -77,9 +80,5 @@ export async function clearCompletedGroceryItems() {
     where: { clerkId: user.id, isCompleted: true },
   });
 
-  try {
-    revalidatePath("/grocery");
-  } catch (e) {
-    // ignore
-  }
+  await invalidateGroceryCache(user.id);
 }

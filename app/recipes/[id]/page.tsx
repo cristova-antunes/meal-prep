@@ -18,9 +18,12 @@ import EditRecipeForm from "../EditRecipeForm";
 import { Badge } from "@/components/ui/badge";
 import { revalidatePath } from "next/cache";
 
+const getRecipeIdCacheTag = (recipeId: string) =>
+  `recipe_${recipeId.replaceAll("-", "_")}`;
+
 async function invalidateRecipeCache(recipeId: string) {
   await prisma.$accelerate.invalidate({
-    tags: [`recipe_${recipeId.replaceAll("-", "_")}`],
+    tags: [getRecipeIdCacheTag(recipeId)],
   });
 
   revalidatePath(`/recipes/${recipeId}`);
@@ -267,7 +270,7 @@ export default async function RecipeDetailPage({
   const recipe = await prisma.recipe.findUnique({
     where: { id },
     cacheStrategy: {
-      tags: [`recipe_${id.replaceAll("-", "_")}`],
+      tags: [getRecipeIdCacheTag(id)],
       ttl: 60,
       swr: 10,
     },
