@@ -52,7 +52,7 @@ export default async function Page() {
       {weeks.length === 0 ? (
         <p>No meal prep weeks yet. Create your first one.</p>
       ) : (
-        <ul className="space-y-3 grid sm:grid-cols-2 md:grid-cols-3 gap-4 ">
+        <ul className="space-y-3 grid sm:grid-cols-2 lg:grid-cols-3 gap-4 ">
           {weeks.map((w) => (
             <li key={w.id}>
               <Card className="full-height">

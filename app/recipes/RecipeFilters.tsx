@@ -132,7 +132,7 @@ export default function RecipeFilters({
 
   return (
     <div className="mb-6 flex flex-col gap-3">
-      <div className="flex gap-2 items-center">
+      <div className="flex gap-2 items-center flex-wrap">
         <InputWithDebounce
           name="q"
           value={q}
@@ -205,7 +205,7 @@ export default function RecipeFilters({
         </button>
       </div>
 
-      <div className="flex gap-4 items-center text-sm">
+      <div className="flex gap-4 items-center text-sm flex-wrap">
         <label className="flex items-center gap-2">
           <Checkbox
             checked={customOnly}
