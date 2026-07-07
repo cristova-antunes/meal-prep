@@ -1,59 +1,57 @@
-import AddGroceryItemForm from "./AddGroceryItemForm";
+import AddGroceryItemForm from "./AddGroceryItemForm"
 
-import { currentUser } from "@clerk/nextjs/server";
-import { prisma } from "@/lib/prisma";
-import IngredientBadge from "@/components/feature/IngredientBadge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { ingredientType } from "@/types/types";
-import type { IngredientType as IngredientTypeEnum } from "@/app/generated/prisma/client";
+import { currentUser } from "@clerk/nextjs/server"
+import { prisma } from "@/lib/prisma"
+import IngredientBadge from "@/components/feature/IngredientBadge"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
+import { ingredientType } from "@/types/types"
+import type { IngredientType as IngredientTypeEnum } from "@/app/generated/prisma/client"
 import {
   clearCompletedGroceryItems,
-  getGroceryCacheTag,
-  invalidateGroceryCache,
   toggleGroceryItemCompleted,
-} from "@/app/actions/grocery";
-import GroceryItemCompletedToggle from "./GroceryItemCompletedToggle";
-import { Badge } from "@/components/ui/badge";
+} from "@/app/actions/grocery"
+import GroceryItemCompletedToggle from "./GroceryItemCompletedToggle"
+import { Badge } from "@/components/ui/badge"
 
 const categoryOrder = [
   ...ingredientType.map((item) => item.value),
   "Other",
-] as const;
+] as const
 
-type GroceryCategory = (typeof categoryOrder)[number];
+type GroceryCategory = (typeof categoryOrder)[number]
 
 type GroceryItemWithIngredient = {
-  id: string;
-  quantity: number;
-  customName: string | null;
-  customType: IngredientTypeEnum | null;
-  ingredientId: string | null;
-  isCompleted: boolean;
+  id: string
+  quantity: number
+  customName: string | null
+  customType: IngredientTypeEnum | null
+  ingredientId: string | null
+  isCompleted: boolean
   ingredient?: {
-    id: string;
-    name: string;
-    type: IngredientTypeEnum | null;
-  } | null;
-};
+    id: string
+    name: string
+    type: IngredientTypeEnum | null
+  } | null
+}
 
 async function addGroceryItem(formData: FormData) {
-  "use server";
+  "use server"
 
-  const user = await currentUser();
+  const user = await currentUser()
 
   if (!user) {
-    throw new Error("You must be signed in to add grocery items.");
+    throw new Error("You must be signed in to add grocery items.")
   }
 
-  const customName = formData.get("customName")?.toString().trim();
-  const customType = formData.get("customType")?.toString().trim();
+  const customName = formData.get("customName")?.toString().trim()
+  const customType = formData.get("customType")?.toString().trim()
 
   if (!customName) {
-    throw new Error("Item name is required.");
+    throw new Error("Item name is required.")
   }
 
-  const hasCustomType = customType && customType !== "Other";
+  const hasCustomType = customType && customType !== "Other"
 
   await prisma.groceryItem.create({
     data: {
@@ -63,31 +61,29 @@ async function addGroceryItem(formData: FormData) {
         ? { customType: customType as IngredientTypeEnum }
         : {}),
     },
-  });
-
-  await invalidateGroceryCache(user.id);
+  })
 }
 
 function getCategoryLabel(category: GroceryCategory) {
   if (category === "Other") {
-    return "Other";
+    return "Other"
   }
 
   return (
     ingredientType.find((option) => option.value === category)?.label ??
     category
-  );
+  )
 }
 
 function sortCategories(a: GroceryCategory, b: GroceryCategory) {
-  if (a === "Other") return 1;
-  if (b === "Other") return -1;
+  if (a === "Other") return 1
+  if (b === "Other") return -1
 
-  return categoryOrder.indexOf(a) - categoryOrder.indexOf(b);
+  return categoryOrder.indexOf(a) - categoryOrder.indexOf(b)
 }
 
 export default async function GroceryPage() {
-  const user = await currentUser();
+  const user = await currentUser()
 
   if (!user) {
     return (
@@ -103,13 +99,12 @@ export default async function GroceryPage() {
           </CardContent>
         </Card>
       </div>
-    );
+    )
   }
 
   const groceryItems = (await prisma.groceryItem.findMany({
     where: { clerkId: user.id },
     orderBy: [{ customName: "asc" }, { quantity: "desc" }],
-    cacheStrategy: { tags: [getGroceryCacheTag(user.id)], ttl: 60, swr: 10 },
     select: {
       id: true,
       quantity: true,
@@ -124,21 +119,21 @@ export default async function GroceryPage() {
         },
       },
     },
-  })) as GroceryItemWithIngredient[];
+  })) as GroceryItemWithIngredient[]
 
   const groupedItems = groceryItems.reduce((acc, item) => {
     const category = item.customName
       ? (item.customType ?? "Other")
-      : (item.ingredient?.type ?? "Other");
+      : (item.ingredient?.type ?? "Other")
 
-    const groupItems = acc.get(category) ?? [];
-    groupItems.push(item as GroceryItemWithIngredient);
-    acc.set(category, groupItems);
-    return acc;
-  }, new Map<GroceryCategory, GroceryItemWithIngredient[]>());
+    const groupItems = acc.get(category) ?? []
+    groupItems.push(item as GroceryItemWithIngredient)
+    acc.set(category, groupItems)
+    return acc
+  }, new Map<GroceryCategory, GroceryItemWithIngredient[]>())
 
-  const sortedCategories = Array.from(groupedItems.keys()).sort(sortCategories);
-  const completedCount = groceryItems.filter((item) => item.isCompleted).length;
+  const sortedCategories = Array.from(groupedItems.keys()).sort(sortCategories)
+  const completedCount = groceryItems.filter((item) => item.isCompleted).length
 
   return (
     <main>
@@ -179,7 +174,7 @@ export default async function GroceryPage() {
       ) : (
         <div className="space-y-6">
           {sortedCategories.map((category) => {
-            const items = groupedItems.get(category) ?? [];
+            const items = groupedItems.get(category) ?? []
 
             return (
               <Card key={category}>
@@ -205,7 +200,7 @@ export default async function GroceryPage() {
                       const label =
                         item.customName ??
                         item.ingredient?.name ??
-                        "Unknown item";
+                        "Unknown item"
 
                       return (
                         <Card key={item.id}>
@@ -221,15 +216,15 @@ export default async function GroceryPage() {
                             </span>
                           </CardContent>
                         </Card>
-                      );
+                      )
                     })}
                   </div>
                 </CardContent>
               </Card>
-            );
+            )
           })}
         </div>
       )}
     </main>
-  );
+  )
 }
