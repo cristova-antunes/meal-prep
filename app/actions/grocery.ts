@@ -15,6 +15,8 @@ export async function addToGrocery(ingredientId: string) {
       create: { clerkId: user.id, ingredientId },
     })
 
+    revalidatePath("/grocery")
+
     return { ok: true }
   } catch (err) {
     return { ok: false, error: String(err) }
@@ -66,4 +68,6 @@ export async function clearCompletedGroceryItems() {
   await prisma.groceryItem.deleteMany({
     where: { clerkId: user.id, isCompleted: true },
   })
+
+  revalidatePath("/grocery")
 }
