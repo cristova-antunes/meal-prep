@@ -1,12 +1,21 @@
-import Link from "next/link";
-import { currentUser } from "@clerk/nextjs/server";
-import { prisma } from "@/lib/prisma";
-import { buttonVariants } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { WeeklyMenuWithRecipes } from "@/types/prisma";
+import Link from "next/link"
+import { currentUser } from "@clerk/nextjs/server"
+import { prisma } from "@/lib/prisma"
+import { buttonVariants } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { WeeklyMenuWithRecipes } from "@/types/prisma"
 
-export default async function Page() {
-  const user = await currentUser();
+export default async function Page({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+}) {
+  const user = await currentUser()
+  const resolvedSearchParams = await searchParams
+  const showAll =
+    (Array.isArray(resolvedSearchParams?.showAll)
+      ? resolvedSearchParams.showAll[0]
+      : resolvedSearchParams?.showAll) === "true"
 
   if (!user) {
     return (
@@ -18,7 +27,7 @@ export default async function Page() {
           Your meal prep weeks are stored per Clerk user.
         </p>
       </div>
-    );
+    )
   }
 
   const weeks = (await prisma.weeklyMenu.findMany({
@@ -26,7 +35,6 @@ export default async function Page() {
     where: {
       clerkId: user.id,
     },
-    take: 3,
     cacheStrategy: { ttl: 60, swr: 10 },
     include: {
       recipes: {
@@ -35,25 +43,37 @@ export default async function Page() {
         },
       },
     },
-  })) as WeeklyMenuWithRecipes;
+  })) as WeeklyMenuWithRecipes
+
+  const visibleWeeks = showAll ? weeks : weeks.slice(0, 3)
 
   return (
     <div className="space-y-6">
       <header className="flex items-center justify-between">
         <h1 className="text-3xl font-semibold">Meal prep weeks</h1>
-        <Link
-          href="/create-meal-prep"
-          className={buttonVariants({ variant: "default" })}
-        >
-          Create new week
-        </Link>
+        <div className="flex items-center gap-2">
+          {!showAll && weeks.length > 3 && (
+            <Link
+              href="/meal-prep?showAll=true"
+              className={buttonVariants({ variant: "outline" })}
+            >
+              See all weekly menus
+            </Link>
+          )}
+          <Link
+            href="/create-meal-prep"
+            className={buttonVariants({ variant: "default" })}
+          >
+            Create new week
+          </Link>
+        </div>
       </header>
 
       {weeks.length === 0 ? (
         <p>No meal prep weeks yet. Create your first one.</p>
       ) : (
         <ul className="space-y-3 grid sm:grid-cols-2 lg:grid-cols-3 gap-4 ">
-          {weeks.map((w) => (
+          {visibleWeeks.map((w) => (
             <li key={w.id}>
               <Card className="full-height">
                 <CardHeader>
@@ -76,16 +96,16 @@ export default async function Page() {
                           {(() => {
                             const allRecipes = w.recipes.flatMap(
                               (daily) => daily.recipes,
-                            );
+                            )
                             const meatCount = allRecipes.filter(
                               (r) => r.type === "MEAT",
-                            ).length;
+                            ).length
                             const fishCount = allRecipes.filter(
                               (r) => r.type === "FISH",
-                            ).length;
+                            ).length
                             const vegetarianCount = allRecipes.filter(
                               (r) => r.type === "VEGETARIAN",
-                            ).length;
+                            ).length
 
                             return (
                               <>
@@ -120,7 +140,7 @@ export default async function Page() {
                                   </div>
                                 )}
                               </>
-                            );
+                            )
                           })()}
                         </div>
                         <div className="text-sm text-muted-foreground">
@@ -147,5 +167,5 @@ export default async function Page() {
         </ul>
       )}
     </div>
-  );
+  )
 }
